@@ -5,7 +5,7 @@ export async function createPage(data: PageCreateDto): Promise<Page> {
   return prisma.page.create({
     data: {
       title: data.title,
-      content: {},
+      content: "",
     },
   });
 }

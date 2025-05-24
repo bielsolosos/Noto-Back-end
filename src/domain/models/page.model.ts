@@ -1,8 +1,6 @@
-import { JsonValue } from "@prisma/client/runtime/library";
-
 export interface PageCreateDto {
   title: string;
-  content: JsonValue;
+  content: string;
 }
 
 export interface PageUpdateDTO {
@@ -14,7 +12,7 @@ export interface PageUpdateDTO {
 export type Page = {
   id: string;
   title: string;
-  content: JsonValue;
+  content: string;
   createdAt: Date;
   updatedAt: Date;
   archived: boolean;
