@@ -43,13 +43,13 @@ export async function updatePage(
 export async function deletePage(req: Request, res: Response) {
   try {
     const page = await service.deleteById(req.params.id);
-    res.json(page);
+    res.status(204).send();
   } catch (error) {
     internalServerError(res);
   }
 }
 
-export async function listPages(_req: Request, res: Response) {
+export async function listPages(req: Request, res: Response) {
   try {
     const pages = await service.list();
     res.json(pages);
