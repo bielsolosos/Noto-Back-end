@@ -1,6 +1,6 @@
 export interface PageCreateDto {
   title: string;
-  content: string;
+  content?: string;
 }
 
 export interface PageUpdateDTO {

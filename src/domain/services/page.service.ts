@@ -2,7 +2,9 @@ import { Page, PageCreateDto, PageUpdateDTO } from "../models/page.model";
 import * as repository from "../repositories/page.repository";
 
 export async function create(data: PageCreateDto): Promise<Page> {
-  // Aqui você pode colocar regras de negócio antes de criar
+  if (!data.content) {
+    data.content = "# Bem vindo a sua nova página";
+  }
   return repository.createPage(data);
 }
 

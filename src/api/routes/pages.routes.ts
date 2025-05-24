@@ -27,9 +27,9 @@
  *                 type: string
  *                 example: Minha página
  *               content:
- *                 type: object
- *                 description: Conteúdo JSON da página
- *                 example: { "blocks": [] }
+ *                 type: string
+ *                 description: Conteúdo Markdown da página
+ *                 example: "# Título\n\nEste é o conteúdo em markdown."
  *     responses:
  *       201:
  *         description: Página criada com sucesso
@@ -109,7 +109,8 @@
  *               title:
  *                 type: string
  *               content:
- *                 type: object
+ *                 type: string
+ *                 description: Conteúdo Markdown da página
  *               archived:
  *                 type: boolean
  *     responses:
@@ -166,9 +167,9 @@
  *           type: string
  *           example: "Minha página"
  *         content:
- *           type: object
- *           description: Conteúdo JSON da página
- *           example: { "blocks": [] }
+ *           type: string
+ *           description: Conteúdo Markdown da página
+ *           example: "# Título\n\nConteúdo em markdown."
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -181,6 +182,7 @@
  *           type: boolean
  *           example: false
  */
+
 import { Router } from "express";
 import { validateBody } from "../../core/validateBody";
 import {
