@@ -11,7 +11,7 @@
     "migrate": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "postinstall": "prisma generate",
-    "start": "node dist/server.js"
+    "start": "npm run migrate:deploy && node dist/server.js"
   },
   "keywords": [],
   "author": "",
