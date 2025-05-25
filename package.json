@@ -7,8 +7,10 @@
     "dev-flat": "ts-node-dev --respawn --transpile-only app/server.ts",
     "dev": "nodemon",
     "build": "tsc",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "postinstall": "prisma generate",
-    "migrate": "prisma migrate deploy",
     "start": "node dist/server.js"
   },
   "keywords": [],
