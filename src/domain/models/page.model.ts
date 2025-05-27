@@ -9,6 +9,12 @@ export interface PageUpdateDTO {
   archived?: boolean;
 }
 
+export interface PageSummaryDto {
+  id: string;
+  title: string;
+  updatedAt: Date;
+}
+
 export type Page = {
   id: string;
   title: string;

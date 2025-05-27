@@ -194,6 +194,7 @@ import {
   deletePage,
   getPageById,
   listPages,
+  listPagesFull,
   updatePage,
 } from "../controllers/page.controller";
 
@@ -203,6 +204,11 @@ router.post("", validateBody(PageCreateSchema), createPage);
 router.get("/:id", getPageById);
 router.put("/:id", validateBody(PageUpdateSchema), updatePage);
 router.delete("/:id", deletePage);
-router.get("", listPages);
+router.get("/", (req, res) => {
+  if (req.query.full === "true") {
+    return listPagesFull(req, res);
+  }
+  return listPages(req, res);
+});
 
 export default router;
