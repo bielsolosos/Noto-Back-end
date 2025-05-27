@@ -1,4 +1,9 @@
-import { Page, PageCreateDto, PageUpdateDTO } from "../models/page.model";
+import {
+  Page,
+  PageCreateDto,
+  PageSummaryDto,
+  PageUpdateDTO,
+} from "../models/page.model";
 import * as repository from "../repositories/page.repository";
 
 export async function create(data: PageCreateDto): Promise<Page> {
@@ -16,7 +21,19 @@ export async function update(id: string, data: PageUpdateDTO): Promise<Page> {
   return repository.updatePage(id, data);
 }
 
-export async function list(): Promise<Page[]> {
+export async function list(): Promise<PageSummaryDto[]> {
+  const pages = await repository.getAllPages();
+
+  const pagesForSummary: PageSummaryDto[] = pages.map((page) => ({
+    id: page.id,
+    title: page.title,
+    updatedAt: page.updatedAt,
+  }));
+
+  return pagesForSummary;
+}
+
+export async function listFull(): Promise<Page[]> {
   return repository.getAllPages();
 }
 

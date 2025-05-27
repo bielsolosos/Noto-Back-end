@@ -57,3 +57,12 @@ export async function listPages(req: Request, res: Response) {
     internalServerError(res);
   }
 }
+
+export async function listPagesFull(req: Request, res: Response) {
+  try {
+    const pages = await service.listFull();
+    res.json(pages);
+  } catch (error) {
+    internalServerError(res);
+  }
+}
