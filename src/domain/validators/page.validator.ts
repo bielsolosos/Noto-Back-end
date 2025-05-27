@@ -7,7 +7,7 @@ export const PageCreateSchema = z.object({
 });
 
 export const PageUpdateSchema = z.object({
-  tittle: z.string().min(1).optional(),
+  title: z.string().min(1).optional(),
   content: z.any().optional(),
   archived: z.boolean().optional(),
 });

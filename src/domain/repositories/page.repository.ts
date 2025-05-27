@@ -32,6 +32,9 @@ export async function updatePage(
 ): Promise<Page> {
   return prisma.page.update({
     where: { id },
-    data,
+    data: {
+      title: data.title,
+      content: data.content,
+    },
   });
 }
