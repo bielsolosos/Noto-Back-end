@@ -3,6 +3,7 @@
 
 O **Noto** é um sistema de anotações pessoais inspirado no Notion, criado para permitir que cada usuário tenha controle total sobre suas páginas de anotações, organizando ideias, tarefas e projetos de maneira eficiente.
 
+Pode conferir o front-end aqui: (Front-end) [https://github.com/bielsolosos/Noto-Front-end]
 🏛️ Arquitetura do Projeto
 --------------------------
 
