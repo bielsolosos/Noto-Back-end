@@ -6,6 +6,7 @@ export async function createPage(data: PageCreateDto): Promise<Page> {
     data: {
       title: data.title,
       content: data.content ? data.content : "",
+      userId: data.userId,
     },
   });
 }

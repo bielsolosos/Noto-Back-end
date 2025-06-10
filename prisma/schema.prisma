@@ -13,11 +13,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model page{
-  id String @id @default(uuid())
-  title String
-  content String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  archived   Boolean  @default(false)
+model User{
+  id String @id @default(uuid()) @map("user_id")
+  email String @unique @map("user_email")
+  username String @unique @map("user_username")
+  password String @map("user_password")
+  pages Page[]
+}
+
+model Page{
+  id String @id @default(uuid()) @map("page_id")
+  title String @map("page_title")
+  content String @map("page_content")
+  createdAt  DateTime @default(now()) @map("page_createdAt")
+  updatedAt  DateTime @updatedAt @map("page_updatedAt")
+  archived   Boolean  @default(false) @map("page_archived")
+  user User @relation(fields: [userId], references: [id]) 
+  userId String @map("user_id")
 }
