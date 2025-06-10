@@ -1,5 +1,5 @@
+import { Page } from "@prisma/client";
 import {
-  Page,
   PageCreateDto,
   PageSummaryDto,
   PageUpdateDTO,
