@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { internalServerError } from "../../core/internalServerErrorUtils";
+import {
+  ConflictError,
+  conflictErrorMessage,
+  internalServerError,
+} from "../../core/messageValidationUtils";
 import { CreateUserDto } from "../../domain/models/user.model";
 import * as service from "../../domain/services/user.service";
 
@@ -12,6 +16,9 @@ export async function createUser(
     res.status(201).json(user);
     return;
   } catch (error) {
+    if (error instanceof ConflictError) {
+      conflictErrorMessage(res, error as ConflictError);
+    }
     internalServerError(res);
   }
 }

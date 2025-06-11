@@ -16,12 +16,20 @@ export async function getUsersSummary(): Promise<User[]> {
   return prisma.user.findMany();
 }
 
-export async function getUser(id: string): Promise<User | null> {
+export async function findById(id: string): Promise<User | null> {
   return prisma.user.findUnique({
     where: {
       id: id,
     },
   });
+}
+
+export async function findByEmail(email: string): Promise<User | null> {
+  return prisma.user.findUnique({ where: { email } });
+}
+
+export async function findByUsername(username: string): Promise<User | null> {
+  return prisma.user.findUnique({ where: { username } });
 }
 
 export async function deleteUser(id: string): Promise<User> {
