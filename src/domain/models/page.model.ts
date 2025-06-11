@@ -15,3 +15,12 @@ export interface PageSummaryDto {
   title: string;
   updatedAt: Date;
 }
+
+export interface PageDto {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  archived: boolean;
+}
