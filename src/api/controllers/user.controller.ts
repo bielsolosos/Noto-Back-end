@@ -23,4 +23,11 @@ export async function createUser(
   }
 }
 
-//TODO terminar esses cabras aqui
+export async function getAllUsers(req: Request<{}, {}>, res: Response) {
+  try {
+    const users = await service.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    internalServerError(res);
+  }
+}
