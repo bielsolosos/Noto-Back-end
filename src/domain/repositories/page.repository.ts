@@ -1,5 +1,6 @@
+import { Page } from "@prisma/client";
 import prisma from "../../core/prisma";
-import { Page, PageCreateDto, PageUpdateDTO } from "../models/page.model";
+import { PageCreateDto, PageUpdateDTO } from "../models/page.model";
 
 export async function createPage(data: PageCreateDto): Promise<Page> {
   return prisma.page.create({

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { internalServerError } from "../../core/internalServerErrorUtils";
+import { internalServerError } from "../../core/messageValidationUtils";
 import { PageCreateDto, PageUpdateDTO } from "../../domain/models/page.model";
 import * as service from "../../domain/services/page.service";
 

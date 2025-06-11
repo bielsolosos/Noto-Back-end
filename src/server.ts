@@ -7,6 +7,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import homeRoutes from "./api/routes/home.routes";
 import pagesRoutes from "./api/routes/pages.routes";
+import userRoutes from "./api/routes/user.routes";
 import swaggerOptions from "./core/swagger.config";
 
 //Variáveis de ambiente
@@ -25,6 +26,7 @@ app.use(cors());
 
 app.use("/", homeRoutes);
 app.use("/pages", pagesRoutes);
+app.use("/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em ${ADDRESS}:${PORT}`);
