@@ -1,9 +1,14 @@
+import { User } from "@prisma/client";
 import prisma from "../../core/prisma";
-import { User } from "../models/user.model";
+import { CreateUserDto } from "../models/user.model";
 
-export async function createUser(data: User): Promise<User> {
+export async function createUser(data: CreateUserDto): Promise<User> {
   return prisma.user.create({
-    data: data,
+    data: {
+      email: data.email,
+      username: data.username,
+      password: data.password as string,
+    },
   });
 }
 
