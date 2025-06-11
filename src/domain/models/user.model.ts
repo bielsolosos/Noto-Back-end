@@ -15,3 +15,8 @@ export interface UserDto {
   email: string;
   username: string;
 }
+
+export interface changePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+}

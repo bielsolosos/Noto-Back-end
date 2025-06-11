@@ -40,7 +40,7 @@ export async function deleteUser(id: string): Promise<User> {
   });
 }
 
-export async function updatePage(id: string, user: User): Promise<User> {
+export async function updateUser(id: string, user: User): Promise<User> {
   return prisma.user.update({
     where: { id },
     data: user,

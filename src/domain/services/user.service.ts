@@ -1,6 +1,14 @@
-import { hashPassword } from "../../core/bcrypt";
-import { ConflictError } from "../../core/messageValidationUtils";
-import { CreateUserDto, UserDto, UserSummaryDto } from "../models/user.model";
+import { comparePasswords, hashPassword } from "../../core/bcrypt";
+import {
+  ConflictError,
+  NotFoundError,
+} from "../../core/messageValidationUtils";
+import {
+  changePasswordDto,
+  CreateUserDto,
+  UserDto,
+  UserSummaryDto,
+} from "../models/user.model";
 import * as repository from "../repositories/user.repository";
 
 const defaultPassword = process.env.DEFAULT_PASSWORD || "SenhaPadrão123";
@@ -36,4 +44,25 @@ export async function getAllUsers(): Promise<UserSummaryDto[]> {
     email: user.email,
     username: user.username,
   }));
+}
+export async function changePassword(body: changePasswordDto, id: string) {
+  // Boleano comparando as senhas.
+  const user = await repository.findById(id);
+
+  if (!user) {
+    throw new NotFoundError("Usuário não encontrado.");
+  }
+
+  const isOldPasswordVerified = await comparePasswords(
+    body.oldPassword,
+    user?.password
+  );
+
+  console.log(isOldPasswordVerified);
+  if (!isOldPasswordVerified) {
+    throw new ConflictError("Senha anterior está incorreta.");
+  }
+
+  user.password = await hashPassword(body.newPassword);
+  return await repository.updateUser(id, user);
 }

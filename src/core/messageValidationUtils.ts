@@ -18,11 +18,31 @@ export function conflictErrorMessage(
 }
 
 /**
+ * Função que retorna a formatação Rest para qualquer mensagem de erro usado em conflitos
+ * @param res
+ * @param error
+ * @returns
+ */
+export function notFoundErrorMessage(
+  res: Response,
+  error: NotFoundError
+): Response {
+  return res.status(404).json({ message: error.message });
+}
+
+/**
  * Classe de validação para erros de conflito (Repositories.)
  */
 export class ConflictError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ConflictError";
+  }
+}
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
   }
 }

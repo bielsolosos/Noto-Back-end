@@ -3,8 +3,13 @@ import {
   ConflictError,
   conflictErrorMessage,
   internalServerError,
+  NotFoundError,
+  notFoundErrorMessage,
 } from "../../core/messageValidationUtils";
-import { CreateUserDto } from "../../domain/models/user.model";
+import {
+  changePasswordDto,
+  CreateUserDto,
+} from "../../domain/models/user.model";
 import * as service from "../../domain/services/user.service";
 
 export async function createUser(
@@ -28,6 +33,27 @@ export async function getAllUsers(req: Request<{}, {}>, res: Response) {
     const users = await service.getAllUsers();
     res.json(users);
   } catch (error) {
+    internalServerError(res);
+  }
+}
+
+export async function changePassword(
+  req: Request<{ id: string }, {}, changePasswordDto>,
+  res: Response
+) {
+  try {
+    const user = await service.changePassword(req.body, req.params.id);
+
+    res.json(user);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      notFoundErrorMessage(res, error);
+    }
+
+    if (error instanceof ConflictError) {
+      conflictErrorMessage(res, error);
+    }
+
     internalServerError(res);
   }
 }
