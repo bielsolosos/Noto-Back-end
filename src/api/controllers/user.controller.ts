@@ -57,3 +57,20 @@ export async function changePassword(
     internalServerError(res);
   }
 }
+
+export async function deleteUser(
+  req: Request<{ id: string }, {}, {}>,
+  res: Response
+) {
+  try {
+    const user = await service.deleteUser(req.params.id);
+
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      notFoundErrorMessage(res, error);
+    }
+
+    internalServerError(res);
+  }
+}

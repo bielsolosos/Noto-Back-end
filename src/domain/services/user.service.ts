@@ -58,11 +58,20 @@ export async function changePassword(body: changePasswordDto, id: string) {
     user?.password
   );
 
-  console.log(isOldPasswordVerified);
   if (!isOldPasswordVerified) {
     throw new ConflictError("Senha anterior está incorreta.");
   }
 
   user.password = await hashPassword(body.newPassword);
   return await repository.updateUser(id, user);
+}
+
+export async function deleteUser(id: string): Promise<UserDto> {
+  const user = await repository.findById(id);
+
+  if (!user) {
+    throw new NotFoundError("Usuário não encontrado.");
+  }
+
+  return repository.deleteUser(id);
 }
