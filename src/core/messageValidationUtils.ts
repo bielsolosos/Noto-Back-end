@@ -31,6 +31,19 @@ export function notFoundErrorMessage(
 }
 
 /**
+ * Função que retorna a formatação Rest para qualquer mensagem de erro usado em conflitos
+ * @param res
+ * @param error
+ * @returns
+ */
+export function unauthorizedErrorMessage(
+  res: Response,
+  error: NotFoundError
+): Response {
+  return res.status(503).json({ message: error.message });
+}
+
+/**
  * Classe de validação para erros de conflito (Repositories.)
  */
 export class ConflictError extends Error {
@@ -41,6 +54,13 @@ export class ConflictError extends Error {
 }
 
 export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
+
+export class UnauthorizedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "NotFoundError";
