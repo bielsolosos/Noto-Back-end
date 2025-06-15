@@ -16,11 +16,11 @@ export interface PageSummaryDto {
   updatedAt: Date;
 }
 
-export type Page = {
+export interface PageDto {
   id: string;
   title: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;
   archived: boolean;
-};
+}
