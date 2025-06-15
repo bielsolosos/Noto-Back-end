@@ -158,6 +158,7 @@
  *           example: "SenhaNova123"
  */
 import { Router } from "express";
+import { authenticateToken } from "../../core/jwtRequestMiddleware";
 import { validateBody } from "../../core/validateBody";
 import {
   ChangePasswordSchema,
@@ -171,6 +172,8 @@ import {
 } from "../controllers/user.controller";
 
 const router = Router();
+
+router.use(authenticateToken);
 
 router.get("", getAllUsers);
 router.post("", validateBody(UserCreateSchema), createUser);
