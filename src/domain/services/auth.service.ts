@@ -7,11 +7,7 @@ import * as userRepository from "../repositories/user.repository";
 
 const API_KEY = process.env.API_KEY || "batatinha123";
 
-export async function login(email: string, password: string, apiKey: string) {
-  if (apiKey !== API_KEY) {
-    throw new UnauthorizedError("API Key inválida.");
-  }
-
+export async function login(email: string, password: string) {
   const user = await userRepository.findByEmail(email);
   if (!user) {
     throw new UnauthorizedError("Credenciais inválidas.");

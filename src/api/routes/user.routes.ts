@@ -173,10 +173,10 @@ import {
 
 const router = Router();
 
-router.use(authenticateToken);
-
-router.get("", getAllUsers);
 router.post("", validateBody(UserCreateSchema), createUser);
+
+router.use(authenticateToken);
+router.get("", getAllUsers);
 router.post(
   "/change-password/:id",
   validateBody(ChangePasswordSchema),

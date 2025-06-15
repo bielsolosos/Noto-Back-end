@@ -9,9 +9,9 @@ import * as authService from "../../domain/services/auth.service";
 
 export async function login(req: Request<{}, {}, LoginDto>, res: Response) {
   try {
-    const { email, password, apiKey } = req.body;
+    const { email, password } = req.body;
 
-    const result = await authService.login(email, password, apiKey);
+    const result = await authService.login(email, password);
 
     res.json(result);
   } catch (error) {

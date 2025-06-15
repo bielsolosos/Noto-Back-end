@@ -8,6 +8,7 @@ export interface CreateUserDto {
   email: string;
   username: string;
   password?: string;
+  apiKey: string;
 }
 
 export interface UserDto {

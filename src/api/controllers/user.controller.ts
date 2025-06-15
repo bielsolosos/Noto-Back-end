@@ -5,6 +5,7 @@ import {
   internalServerError,
   NotFoundError,
   notFoundErrorMessage,
+  UnauthorizedError,
 } from "../../core/messageValidationUtils";
 import {
   changePasswordDto,
@@ -23,6 +24,9 @@ export async function createUser(
   } catch (error) {
     if (error instanceof ConflictError) {
       conflictErrorMessage(res, error as ConflictError);
+    }
+    if (error instanceof UnauthorizedError) {
+      conflictErrorMessage(res, error as UnauthorizedError);
     }
     internalServerError(res);
   }

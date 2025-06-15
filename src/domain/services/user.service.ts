@@ -2,6 +2,7 @@ import { comparePasswords, hashPassword } from "../../core/bcrypt";
 import {
   ConflictError,
   NotFoundError,
+  UnauthorizedError,
 } from "../../core/messageValidationUtils";
 import {
   changePasswordDto,
@@ -12,8 +13,15 @@ import {
 import * as repository from "../repositories/user.repository";
 
 const defaultPassword = process.env.DEFAULT_PASSWORD || "SenhaPadrão123";
+const API_KEY = process.env.API_KEY || "batatinha123";
 
 export async function createUser(user: CreateUserDto): Promise<UserDto> {
+  if (user.apiKey !== API_KEY) {
+    throw new UnauthorizedError(
+      "Não tenta hackear minha API não mano. PFV. Caso ache algum bug por favor entre em contato com bielrochasantoscoutinho@gmail.com"
+    );
+  }
+
   const emailExists = await repository.findByEmail(user.email);
   if (emailExists) {
     throw new ConflictError("Email já está em uso.");
