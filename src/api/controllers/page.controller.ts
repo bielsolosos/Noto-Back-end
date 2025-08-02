@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getTokenFromRequest } from "../../core/jwtUilts";
 import { internalServerError } from "../../core/messageValidationUtils";
 import { PageCreateDto, PageUpdateDTO } from "../../domain/models/page.model";
 import * as service from "../../domain/services/page.service";
@@ -8,7 +9,8 @@ export async function createPage(
   res: Response
 ) {
   try {
-    const page = await service.create(req.body);
+    const token = getTokenFromRequest(req);
+    const page = await service.create(req.body, token);
     res.status(201).json(page);
   } catch (error) {
     internalServerError(res);
@@ -51,7 +53,8 @@ export async function deletePage(req: Request, res: Response) {
 
 export async function listPages(req: Request, res: Response) {
   try {
-    const pages = await service.list();
+    const token = getTokenFromRequest(req);
+    const pages = await service.listFull(token);
     res.json(pages);
   } catch (error) {
     internalServerError(res);
@@ -60,7 +63,8 @@ export async function listPages(req: Request, res: Response) {
 
 export async function listPagesFull(req: Request, res: Response) {
   try {
-    const pages = await service.listFull();
+    const token = getTokenFromRequest(req);
+    const pages = await service.listFull(token);
     res.json(pages);
   } catch (error) {
     internalServerError(res);

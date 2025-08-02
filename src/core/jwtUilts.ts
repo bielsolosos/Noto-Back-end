@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Request } from "express";
 import * as jwt from "jsonwebtoken";
 import { storeRefreshToken } from "./authTokenStore";
 
@@ -18,5 +19,31 @@ export function generateJwtToken(payload: JwtPayload): string {
 export function generateRefreshToken(userId: string): string {
   const token = crypto.randomBytes(40).toString("hex");
   storeRefreshToken(token, userId, REFRESH_TTL_MS);
+  return token;
+}
+
+export function getUserIdFromToken(token: string): string {
+  const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return decoded.sub;
+}
+
+export function getUsernameFromToken(token: string): string {
+  const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return decoded.username;
+}
+
+export function getTokenFromRequest(req: Request): string | null {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) return null;
+
+  // O formato esperado é "Bearer tokenAqui"
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2) return null;
+
+  const scheme = parts[0];
+  const token = parts[1];
+
+  if (!/^Bearer$/i.test(scheme)) return null;
+
   return token;
 }
