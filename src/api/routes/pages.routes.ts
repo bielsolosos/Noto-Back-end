@@ -184,6 +184,7 @@
  */
 
 import { Router } from "express";
+import { authenticateToken } from "../../core/jwtRequestMiddleware";
 import { validateBody } from "../../core/validateBody";
 import {
   PageCreateSchema,
@@ -199,6 +200,8 @@ import {
 } from "../controllers/page.controller";
 
 const router = Router();
+
+router.use(authenticateToken);
 
 router.post("", validateBody(PageCreateSchema), createPage);
 router.get("/:id", getPageById);
