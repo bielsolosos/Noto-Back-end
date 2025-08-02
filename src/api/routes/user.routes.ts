@@ -169,6 +169,7 @@ import {
   createUser,
   deleteUser,
   getAllUsers,
+  getMe,
 } from "../controllers/user.controller";
 
 const router = Router();
@@ -183,5 +184,6 @@ router.post(
   changePassword
 );
 router.delete("/:id", deleteUser);
+router.get("/me", getMe);
 
 export default router;

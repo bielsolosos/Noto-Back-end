@@ -1,4 +1,5 @@
 import { comparePasswords, hashPassword } from "../../core/bcrypt";
+import { getUserIdFromToken } from "../../core/jwtUilts";
 import {
   ConflictError,
   NotFoundError,
@@ -82,4 +83,16 @@ export async function deleteUser(id: string): Promise<UserDto> {
   }
 
   return repository.deleteUser(id);
+}
+
+export async function getMe(token: string | null) {
+  const userId = getUserIdFromToken(token!);
+
+  const user = await repository.findById(userId);
+
+  return {
+    id: user?.id,
+    email: user?.email,
+    username: user?.username,
+  };
 }

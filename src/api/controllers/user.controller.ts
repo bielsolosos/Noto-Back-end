@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getTokenFromRequest } from "../../core/jwtUilts";
 import {
   ConflictError,
   conflictErrorMessage,
@@ -12,6 +13,11 @@ import {
   CreateUserDto,
 } from "../../domain/models/user.model";
 import * as service from "../../domain/services/user.service";
+
+export async function getMe(req: Request<{}, {}>, res: Response) {
+  const user = await service.getMe(getTokenFromRequest(req));
+  res.status(200).json(user);
+}
 
 export async function createUser(
   req: Request<{}, {}, CreateUserDto>,
