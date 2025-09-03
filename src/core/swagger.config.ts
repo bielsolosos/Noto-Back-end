@@ -1,6 +1,7 @@
 import path from "path";
+import config from "./config";
 
-const PORT = process.env.PORT || 8080;
+const PORT = config.port;
 
 const swaggerOptions = {
   definition: {

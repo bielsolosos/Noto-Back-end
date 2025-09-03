@@ -9,11 +9,12 @@ import authRoutes from "./api/routes/auth.routes";
 import homeRoutes from "./api/routes/home.routes";
 import pagesRoutes from "./api/routes/pages.routes";
 import userRoutes from "./api/routes/user.routes";
+import config from "./core/config";
 import swaggerOptions from "./core/swagger.config";
 
-//Variáveis de ambiente
-const PORT = process.env.PORT || 8080;
-const ADDRESS = process.env.ADDRESS || "http://localhost";
+// Variáveis de ambiente
+const PORT = config.port;
+const ADDRESS = config.address;
 
 const app = express();
 //Importa a documentação base do config

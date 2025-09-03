@@ -19,6 +19,7 @@ services:
     volumes:
       - .:/app:Z
       - /app/node_modules
+      - ./logs:/app/logs
     restart: unless-stopped
     networks:
       - noto-network-dev

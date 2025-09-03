@@ -1,11 +1,12 @@
 import { getRefreshTokenData } from "../../core/authTokenStore";
 import { comparePasswords } from "../../core/bcrypt";
+import config from "../../core/config";
 import { generateJwtToken, generateRefreshToken } from "../../core/jwtUilts";
 import { UnauthorizedError } from "../../core/messageValidationUtils";
 import { UserDto } from "../models/user.model";
 import * as userRepository from "../repositories/user.repository";
 
-const API_KEY = process.env.API_KEY || "batatinha123";
+const API_KEY = config.apiKey;
 
 export async function login(email: string, password: string, apiKey: string) {
   if (!apiKey || apiKey !== API_KEY) {
