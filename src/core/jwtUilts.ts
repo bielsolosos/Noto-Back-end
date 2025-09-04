@@ -2,14 +2,16 @@ import crypto from "crypto";
 import { Request } from "express";
 import * as jwt from "jsonwebtoken";
 import { storeRefreshToken } from "./authTokenStore";
+import config from "./config";
 
-const JWT_SECRET = process.env.JWT_SECRET || "segredo-jwt";
-const EXPIRE_TIME = Number(process.env.EXPIRE_TIME) || 3600;
+const JWT_SECRET = config.jwtSecret;
+const EXPIRE_TIME = config.expireTime;
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface JwtPayload {
   sub: string;
   username: string;
+  role_admin: boolean;
 }
 
 export function generateJwtToken(payload: JwtPayload): string {

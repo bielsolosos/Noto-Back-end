@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import config from "./config";
 import { JwtPayload } from "./jwtUilts";
 
-const JWT_SECRET = process.env.JWT_SECRET || "segredo-jwt";
+const JWT_SECRET = config.jwtSecret;
 
 export interface AuthenticatedRequest extends Request {
   user?: {

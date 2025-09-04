@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noto-backend-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/noto-db}
+      - PORT=8080
+      - ADDRESS=http://localhost
+      - JWT_SECRET=segredo-jwt
+      - EXPIRE_TIME=3600
+      - API_KEY=batatinha123
+      - DEFAULT_PASSWORD=SenhaPadrão123
+      - NODE_ENV=development
+    volumes:
+      - .:/app:Z
+      - /app/node_modules
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - noto-network-dev
+
+networks:
+  noto-network-dev:
+    name: noto-network-dev
+    external: true

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { authLogger, errorLogger } from "../../core/logger";
 import {
   internalServerError,
   UnauthorizedError,
@@ -11,15 +12,38 @@ export async function login(req: Request<{}, {}, LoginDto>, res: Response) {
   try {
     const { email, password, apiKey } = req.body;
 
+    authLogger.loginAttempt(email, false, {
+      action: "login_start",
+      ipAddress: req.ip,
+    });
+
     const result = await authService.login(email, password, apiKey);
 
+    authLogger.loginAttempt(email, true, {
+      action: "login_success",
+      ipAddress: req.ip,
+    });
+
     res.json(result);
-  } catch (error) {
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error("Unknown error");
+
+    authLogger.loginAttempt(req.body.email, false, {
+      action: "login_failed",
+      error: error.message,
+      ipAddress: req.ip,
+    });
+
     if (error instanceof UnauthorizedError) {
       unauthorizedErrorMessage(res, error);
+    } else {
+      errorLogger.error(error, {
+        action: "login",
+        email: req.body.email,
+        ipAddress: req.ip,
+      });
+      internalServerError(res);
     }
-
-    internalServerError(res);
   }
 }
 
