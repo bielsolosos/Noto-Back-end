@@ -4,6 +4,7 @@ export const UserCreateSchema = z.object({
   email: z.string().min(1, "Email é Obrigatório").email(),
   username: z.string().min(1, "Usuário é obrigatório"),
   apiKey: z.string().optional(),
+  role_admin: z.boolean().optional(),
 });
 
 export const ChangePasswordSchema = z.object({

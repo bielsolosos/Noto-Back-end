@@ -84,3 +84,21 @@ export async function deleteUser(
     internalServerError(res);
   }
 }
+
+export async function updateUserRole(
+  req: Request<{ id: string }, {}, { role_admin: boolean }>,
+  res: Response
+) {
+  try {
+    const { id } = req.params;
+    const { role_admin } = req.body;
+    
+    const user = await service.updateUserRole(id, role_admin);
+    res.json(user);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      notFoundErrorMessage(res, error);
+    }
+    internalServerError(res);
+  }
+}
