@@ -11,6 +11,7 @@ const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export interface JwtPayload {
   sub: string;
   username: string;
+  role_admin: boolean;
 }
 
 export function generateJwtToken(payload: JwtPayload): string {

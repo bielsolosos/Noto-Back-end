@@ -174,16 +174,18 @@ import {
 
 const router = Router();
 
+// Criação de usuário (público, com API key)
 router.post("", validateBody(UserCreateSchema), createUser);
 
+// Rotas autenticadas
 router.use(authenticateToken);
+router.get("/me", getMe);
 router.get("", getAllUsers);
+router.delete("/:id", deleteUser);
 router.post(
   "/change-password/:id",
   validateBody(ChangePasswordSchema),
   changePassword
 );
-router.delete("/:id", deleteUser);
-router.get("/me", getMe);
 
 export default router;

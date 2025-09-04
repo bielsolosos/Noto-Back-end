@@ -8,6 +8,7 @@ export async function createUser(data: CreateUserDto): Promise<User> {
       email: data.email,
       username: data.username,
       password: data.password as string,
+      role_admin: data.role_admin || false,
     },
   });
 }
@@ -44,5 +45,27 @@ export async function updateUser(id: string, user: User): Promise<User> {
   return prisma.user.update({
     where: { id },
     data: user,
+  });
+}
+
+// Atualizar senha do usuário
+export async function updateUserPassword(
+  id: string,
+  password: string
+): Promise<User> {
+  return prisma.user.update({
+    where: { id },
+    data: { password },
+  });
+}
+
+// Atualizar role de admin
+export async function updateUserRole(
+  id: string,
+  role_admin: boolean
+): Promise<User> {
+  return prisma.user.update({
+    where: { id },
+    data: { role_admin },
   });
 }

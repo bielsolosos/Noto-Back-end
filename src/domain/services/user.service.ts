@@ -44,6 +44,7 @@ export async function createUser(user: CreateUserDto): Promise<UserDto> {
     id: userToSend.id,
     email: userToSend.email,
     username: userToSend.username,
+    role_admin: userToSend.role_admin || false,
   };
 }
 export async function getAllUsers(): Promise<UserSummaryDto[]> {
@@ -52,6 +53,7 @@ export async function getAllUsers(): Promise<UserSummaryDto[]> {
     id: user.id,
     email: user.email,
     username: user.username,
+    role_admin: user.role_admin || false,
   }));
 }
 export async function changePassword(body: changePasswordDto, id: string) {
@@ -94,5 +96,39 @@ export async function getMe(token: string | null) {
     id: user?.id,
     email: user?.email,
     username: user?.username,
+    role_admin: user?.role_admin || false,
+  };
+}
+
+// Resetar senha do usuário (apenas admin)
+export async function resetUserPassword(
+  userId: string,
+  newPassword: string
+): Promise<void> {
+  const user = await repository.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Usuário não encontrado.");
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await repository.updateUserPassword(userId, hashedPassword);
+}
+
+// Atualizar role de admin
+export async function updateUserRole(
+  userId: string,
+  role_admin: boolean
+): Promise<UserDto> {
+  const user = await repository.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Usuário não encontrado.");
+  }
+
+  const updatedUser = await repository.updateUserRole(userId, role_admin);
+  return {
+    id: updatedUser.id,
+    email: updatedUser.email,
+    username: updatedUser.username,
+    role_admin: updatedUser.role_admin,
   };
 }

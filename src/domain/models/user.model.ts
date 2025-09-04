@@ -2,6 +2,7 @@ export interface UserSummaryDto {
   id: string;
   email: string;
   username: string;
+  role_admin: boolean;
 }
 
 export interface CreateUserDto {
@@ -9,12 +10,14 @@ export interface CreateUserDto {
   username: string;
   password?: string;
   apiKey: string;
+  role_admin?: boolean;
 }
 
 export interface UserDto {
   id: string;
   email: string;
   username: string;
+  role_admin: boolean;
 }
 
 export interface changePasswordDto {

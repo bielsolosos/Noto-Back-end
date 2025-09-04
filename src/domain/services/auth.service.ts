@@ -26,6 +26,7 @@ export async function login(email: string, password: string, apiKey: string) {
   const payload = {
     sub: user.id,
     username: user.username,
+    role_admin: user.role_admin || false,
   };
 
   const token = generateJwtToken(payload);
@@ -35,6 +36,7 @@ export async function login(email: string, password: string, apiKey: string) {
     id: user.id,
     username: user.username,
     email: user.email,
+    role_admin: user.role_admin || false,
   };
 
   return { token, refreshToken };
@@ -52,6 +54,7 @@ export async function refreshToken(refreshToken: string) {
   const newAccessToken = generateJwtToken({
     sub: user!.id,
     username: user!.username,
+    role_admin: user!.role_admin || false,
   });
 
   return newAccessToken;

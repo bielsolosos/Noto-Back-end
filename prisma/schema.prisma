@@ -18,6 +18,7 @@ model User{
   email String @unique @map("user_email")
   username String @unique @map("user_username")
   password String @map("user_password")
+  role_admin Boolean @default(false) @map("user_role_admin")
   pages Page[]
 }
 
