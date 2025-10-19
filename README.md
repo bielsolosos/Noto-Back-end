@@ -12,7 +12,7 @@
 **Status: ✅ Versão 1.0 Completa e Pronta para Produção**
 
 - 🌐 [Front-end do projeto](https://github.com/bielsolosos/Noto-Front-end)
-- 📱 [Demo ao vivo](https://noto-front-end.vercel.app)
+- 📱 [Demo ao vivo](https://noto.bielsolososdev.space/)
 
 ## 🏗️ Arquitetura de Produção
 
