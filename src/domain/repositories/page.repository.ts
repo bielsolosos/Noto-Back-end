@@ -21,7 +21,10 @@ export async function getAllPages() {
 }
 
 export async function getAllPagesByUserId(userId: string) {
-  return prisma.page.findMany({ where: { userId: userId } });
+  return prisma.page.findMany({
+    where: { userId: userId },
+    orderBy: { updatedAt: "desc" },
+  });
 }
 
 export async function deletePage(idToDelete: string): Promise<Page> {

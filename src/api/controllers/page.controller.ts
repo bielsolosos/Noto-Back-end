@@ -54,7 +54,7 @@ export async function deletePage(req: Request, res: Response) {
 export async function listPages(req: Request, res: Response) {
   try {
     const token = getTokenFromRequest(req);
-    const pages = await service.listFull(token);
+    const pages = await service.list(token);
     res.json(pages);
   } catch (error) {
     internalServerError(res);
