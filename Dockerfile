@@ -1,23 +1,45 @@
-FROM node:20-alpine
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Instalar dependências de desenvolvimento
+# Copiar arquivos de dependência
 COPY package.json yarn.lock ./
 COPY prisma ./prisma/
 
+# Instalar todas as dependências (incluindo dev)
 RUN yarn install --frozen-lockfile
 
-# Copiar o resto do código
+# Copiar código fonte
 COPY . .
 
-# Gerar cliente Prisma
+# Garantir permissões de execução
+RUN chmod -R +x node_modules/.bin
+
+# Gerar Prisma Client
 RUN yarn prisma generate
 
-# Construir a aplicação
+# Build da aplicação
 RUN yarn build
+
+# Stage 2: Production
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Copiar arquivos necessários
+COPY package.json yarn.lock ./
+COPY prisma ./prisma/
+
+# Instalar apenas dependências de produção
+RUN yarn install --frozen-lockfile --production
+
+# Copiar build e prisma gerado do stage anterior
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 8080
 
-# Em desenvolvimento
-CMD ["yarn", "dev"]
+# Comando de produção
+CMD ["yarn", "start"]
