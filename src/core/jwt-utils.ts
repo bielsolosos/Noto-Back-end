@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import { Request } from "express";
 import * as jwt from "jsonwebtoken";
-import { storeRefreshToken } from "./authTokenStore";
-import config from "./config";
+import config from "../infrastructure/application-config";
+import { storeRefreshToken } from "../infrastructure/auth/authTokenStore";
 
 const JWT_SECRET = config.jwtSecret;
 const EXPIRE_TIME = config.expireTime;

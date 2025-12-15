@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import prisma from "../../core/prisma";
+import prisma from "../../infrastructure/prima-global-client";
 import { CreateUserDto } from "../models/user.model";
 
 export async function createUser(data: CreateUserDto): Promise<User> {
@@ -49,10 +49,7 @@ export async function updateUser(id: string, user: User): Promise<User> {
 }
 
 // Atualizar senha do usuário
-export async function updateUserPassword(
-  id: string,
-  password: string
-): Promise<User> {
+export async function updateUserPassword(id: string, password: string): Promise<User> {
   return prisma.user.update({
     where: { id },
     data: { password },
@@ -60,10 +57,7 @@ export async function updateUserPassword(
 }
 
 // Atualizar role de admin
-export async function updateUserRole(
-  id: string,
-  role_admin: boolean
-): Promise<User> {
+export async function updateUserRole(id: string, role_admin: boolean): Promise<User> {
   return prisma.user.update({
     where: { id },
     data: { role_admin },

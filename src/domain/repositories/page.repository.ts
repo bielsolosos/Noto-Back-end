@@ -1,5 +1,5 @@
 import { Page } from "@prisma/client";
-import prisma from "../../core/prisma";
+import prisma from "../../infrastructure/prima-global-client";
 import { PageCreateDto, PageUpdateDTO } from "../models/page.model";
 
 export async function createPage(data: PageCreateDto): Promise<Page> {
@@ -35,10 +35,7 @@ export async function deletePage(idToDelete: string): Promise<Page> {
   });
 }
 
-export async function updatePage(
-  id: string,
-  data: PageUpdateDTO
-): Promise<Page> {
+export async function updatePage(id: string, data: PageUpdateDTO): Promise<Page> {
   return prisma.page.update({
     where: { id },
     data: {

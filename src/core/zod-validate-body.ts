@@ -1,6 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ZodSchema } from "zod";
 
+//TODO Colocar mensagem de validação Default e também adicionar validação diferente por cara
 export function validateBody<T>(schema: ZodSchema<T>): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);

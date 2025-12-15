@@ -1,8 +1,8 @@
-import { getRefreshTokenData } from "../../core/authTokenStore";
-import { comparePasswords } from "../../core/bcrypt";
-import config from "../../core/config";
-import { generateJwtToken, generateRefreshToken } from "../../core/jwtUilts";
-import { UnauthorizedError } from "../../core/messageValidationUtils";
+import { comparePasswords } from "../../core/bcrypt-utils";
+import { generateJwtToken, generateRefreshToken } from "../../core/jwt-utils";
+import { UnauthorizedError } from "../../core/message-validation-utils";
+import config from "../../infrastructure/application-config";
+import { getRefreshTokenData } from "../../infrastructure/auth/authTokenStore";
 import { UserDto } from "../models/user.model";
 import * as userRepository from "../repositories/user.repository";
 

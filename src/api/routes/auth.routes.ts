@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { validateBody } from "../../core/validateBody";
+import { validateBody } from "../../core/zod-validate-body";
 import { login, refreshToken } from "../controllers/auth.controller";
 import { LoginSchema } from "../validators/auth.validator";
 

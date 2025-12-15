@@ -1,16 +1,8 @@
-import { getUserIdFromToken } from "../../core/jwtUilts";
-import {
-  PageCreateDto,
-  PageDto,
-  PageSummaryDto,
-  PageUpdateDTO,
-} from "../models/page.model";
+import { getUserIdFromToken } from "../../core/jwt-utils";
+import { PageCreateDto, PageDto, PageSummaryDto, PageUpdateDTO } from "../models/page.model";
 import * as repository from "../repositories/page.repository";
 
-export async function create(
-  data: PageCreateDto,
-  token: string | null
-): Promise<PageDto> {
+export async function create(data: PageCreateDto, token: string | null): Promise<PageDto> {
   if (!data.content) {
     data.content = "# Bem vindo a sua nova página";
   }
@@ -48,10 +40,7 @@ export async function getById(id: string): Promise<PageDto | null> {
   return null;
 }
 
-export async function update(
-  id: string,
-  data: PageUpdateDTO
-): Promise<PageDto> {
+export async function update(id: string, data: PageUpdateDTO): Promise<PageDto> {
   const pageToSend = await repository.updatePage(id, data);
 
   return {

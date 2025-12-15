@@ -9,8 +9,8 @@ import authRoutes from "./api/routes/auth.routes";
 import homeRoutes from "./api/routes/home.routes";
 import pagesRoutes from "./api/routes/pages.routes";
 import userRoutes from "./api/routes/user.routes";
-import config from "./core/config";
-import swaggerOptions from "./core/swagger.config";
+import config from "./infrastructure/application-config";
+import swaggerOptions from "./infrastructure/swagger.config";
 
 // Variáveis de ambiente
 const PORT = config.port;

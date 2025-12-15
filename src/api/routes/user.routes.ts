@@ -158,8 +158,8 @@
  *           example: "SenhaNova123"
  */
 import { Router } from "express";
-import { authenticateToken } from "../../core/jwtRequestMiddleware";
-import { validateBody } from "../../core/validateBody";
+import { validateBody } from "../../core/zod-validate-body";
+import { authenticateToken } from "../../infrastructure/auth/jwt-request-middleware";
 import {
   changePassword,
   createUser,

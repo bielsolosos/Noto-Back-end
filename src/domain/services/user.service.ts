@@ -1,16 +1,7 @@
-import { comparePasswords, hashPassword } from "../../core/bcrypt";
-import { getUserIdFromToken } from "../../core/jwtUilts";
-import {
-  ConflictError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../core/messageValidationUtils";
-import {
-  changePasswordDto,
-  CreateUserDto,
-  UserDto,
-  UserSummaryDto,
-} from "../models/user.model";
+import { comparePasswords, hashPassword } from "../../core/bcrypt-utils";
+import { getUserIdFromToken } from "../../core/jwt-utils";
+import { ConflictError, NotFoundError, UnauthorizedError } from "../../core/message-validation-utils";
+import { changePasswordDto, CreateUserDto, UserDto, UserSummaryDto } from "../models/user.model";
 import * as repository from "../repositories/user.repository";
 
 const defaultPassword = process.env.DEFAULT_PASSWORD || "SenhaPadrão123";
@@ -64,10 +55,7 @@ export async function changePassword(body: changePasswordDto, id: string) {
     throw new NotFoundError("Usuário não encontrado.");
   }
 
-  const isOldPasswordVerified = await comparePasswords(
-    body.oldPassword,
-    user?.password
-  );
+  const isOldPasswordVerified = await comparePasswords(body.oldPassword, user?.password);
 
   if (!isOldPasswordVerified) {
     throw new ConflictError("Senha anterior está incorreta.");
@@ -101,10 +89,7 @@ export async function getMe(token: string | null) {
 }
 
 // Resetar senha do usuário (apenas admin)
-export async function resetUserPassword(
-  userId: string,
-  newPassword: string
-): Promise<void> {
+export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
   const user = await repository.findById(userId);
   if (!user) {
     throw new NotFoundError("Usuário não encontrado.");
@@ -115,10 +100,7 @@ export async function resetUserPassword(
 }
 
 // Atualizar role de admin
-export async function updateUserRole(
-  userId: string,
-  role_admin: boolean
-): Promise<UserDto> {
+export async function updateUserRole(userId: string, role_admin: boolean): Promise<UserDto> {
   const user = await repository.findById(userId);
   if (!user) {
     throw new NotFoundError("Usuário não encontrado.");

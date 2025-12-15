@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import config from "./config";
-import { JwtPayload } from "./jwtUilts";
+import { JwtPayload } from "../../core/jwt-utils";
+import config from "../application-config";
 
 const JWT_SECRET = config.jwtSecret;
 
@@ -12,11 +12,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export function authenticateToken(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void {
+export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 

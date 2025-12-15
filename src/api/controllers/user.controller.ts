@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getTokenFromRequest } from "../../core/jwtUilts";
+import { getTokenFromRequest } from "../../core/jwt-utils";
 import {
   ConflictError,
   conflictErrorMessage,
@@ -7,11 +7,8 @@ import {
   NotFoundError,
   notFoundErrorMessage,
   UnauthorizedError,
-} from "../../core/messageValidationUtils";
-import {
-  changePasswordDto,
-  CreateUserDto,
-} from "../../domain/models/user.model";
+} from "../../core/message-validation-utils";
+import { changePasswordDto, CreateUserDto } from "../../domain/models/user.model";
 import * as service from "../../domain/services/user.service";
 
 export async function getMe(req: Request<{}, {}>, res: Response) {
@@ -19,10 +16,7 @@ export async function getMe(req: Request<{}, {}>, res: Response) {
   res.status(200).json(user);
 }
 
-export async function createUser(
-  req: Request<{}, {}, CreateUserDto>,
-  res: Response
-) {
+export async function createUser(req: Request<{}, {}, CreateUserDto>, res: Response) {
   try {
     const user = await service.createUser(req.body);
     res.status(201).json(user);
@@ -47,10 +41,7 @@ export async function getAllUsers(req: Request<{}, {}>, res: Response) {
   }
 }
 
-export async function changePassword(
-  req: Request<{ id: string }, {}, changePasswordDto>,
-  res: Response
-) {
+export async function changePassword(req: Request<{ id: string }, {}, changePasswordDto>, res: Response) {
   try {
     const user = await service.changePassword(req.body, req.params.id);
 
@@ -68,10 +59,7 @@ export async function changePassword(
   }
 }
 
-export async function deleteUser(
-  req: Request<{ id: string }, {}, {}>,
-  res: Response
-) {
+export async function deleteUser(req: Request<{ id: string }, {}, {}>, res: Response) {
   try {
     const user = await service.deleteUser(req.params.id);
 
@@ -85,14 +73,11 @@ export async function deleteUser(
   }
 }
 
-export async function updateUserRole(
-  req: Request<{ id: string }, {}, { role_admin: boolean }>,
-  res: Response
-) {
+export async function updateUserRole(req: Request<{ id: string }, {}, { role_admin: boolean }>, res: Response) {
   try {
     const { id } = req.params;
     const { role_admin } = req.body;
-    
+
     const user = await service.updateUserRole(id, role_admin);
     res.json(user);
   } catch (error) {

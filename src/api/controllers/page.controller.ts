@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
-import { getTokenFromRequest } from "../../core/jwtUilts";
-import { internalServerError } from "../../core/messageValidationUtils";
+import { getTokenFromRequest } from "../../core/jwt-utils";
+import { internalServerError } from "../../core/message-validation-utils";
 import { PageCreateDto, PageUpdateDTO } from "../../domain/models/page.model";
 import * as service from "../../domain/services/page.service";
 
-export async function createPage(
-  req: Request<{}, {}, PageCreateDto>,
-  res: Response
-) {
+export async function createPage(req: Request<{}, {}, PageCreateDto>, res: Response) {
   try {
     const token = getTokenFromRequest(req);
     const page = await service.create(req.body, token);
@@ -30,10 +27,7 @@ export async function getPageById(req: Request, res: Response) {
   }
 }
 
-export async function updatePage(
-  req: Request<{ id: string }, {}, PageUpdateDTO>,
-  res: Response
-) {
+export async function updatePage(req: Request<{ id: string }, {}, PageUpdateDTO>, res: Response) {
   try {
     const page = await service.update(req.params.id, req.body);
     res.json(page);

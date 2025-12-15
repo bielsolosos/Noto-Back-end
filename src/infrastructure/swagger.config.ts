@@ -1,5 +1,5 @@
 import path from "path";
-import config from "./config";
+import config from "./application-config";
 
 const PORT = config.port;
 
@@ -17,7 +17,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: [path.join(__dirname, "../api/routes/*.ts")], // Caminho onde estão os seus arquivos de rota com anotações
+  apis: [path.join(__dirname, "../api/routes/*.ts")],
 };
 
 export default swaggerOptions;
