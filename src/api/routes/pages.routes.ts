@@ -187,10 +187,6 @@ import { Router } from "express";
 import { authenticateToken } from "../../core/jwtRequestMiddleware";
 import { validateBody } from "../../core/validateBody";
 import {
-  PageCreateSchema,
-  PageUpdateSchema,
-} from "../../domain/validators/page.validator";
-import {
   createPage,
   deletePage,
   getPageById,
@@ -198,6 +194,7 @@ import {
   listPagesFull,
   updatePage,
 } from "../controllers/page.controller";
+import { PageCreateSchema, PageUpdateSchema } from "../validators/page.validator";
 
 const router = Router();
 

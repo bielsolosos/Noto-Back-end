@@ -161,10 +161,6 @@ import { Router } from "express";
 import { authenticateToken } from "../../core/jwtRequestMiddleware";
 import { validateBody } from "../../core/validateBody";
 import {
-  ChangePasswordSchema,
-  UserCreateSchema,
-} from "../../domain/validators/users.validator";
-import {
   changePassword,
   createUser,
   deleteUser,
@@ -172,6 +168,7 @@ import {
   getMe,
   updateUserRole,
 } from "../controllers/user.controller";
+import { ChangePasswordSchema, UserCreateSchema } from "../validators/users.validator";
 
 const router = Router();
 
@@ -183,11 +180,7 @@ router.use(authenticateToken);
 router.get("/me", getMe);
 router.get("", getAllUsers);
 router.delete("/:id", deleteUser);
-router.post(
-  "/change-password/:id",
-  validateBody(ChangePasswordSchema),
-  changePassword
-);
+router.post("/change-password/:id", validateBody(ChangePasswordSchema), changePassword);
 router.put("/:id/role", updateUserRole);
 
 export default router;
