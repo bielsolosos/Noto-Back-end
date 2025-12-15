@@ -43,6 +43,8 @@ export async function getAllUsers(req: Request<{}, {}>, res: Response) {
 
 export async function changePassword(req: Request<{ id: string }, {}, changePasswordDto>, res: Response) {
   try {
+    if (getTokenFromRequest(req) == req.params.id) return res.status(503).json({ message: "Operação não permitida" });
+
     const user = await service.changePassword(req.body, req.params.id);
 
     res.json(user);
