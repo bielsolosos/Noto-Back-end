@@ -9,11 +9,9 @@ export function internalServerError(res: Response) {
  * @param res
  * @param error
  * @returns
+ * @deprecated Use o middleware global de erros ao invés desta função
  */
-export function conflictErrorMessage(
-  res: Response,
-  error: ConflictError
-): Response {
+export function conflictErrorMessage(res: Response, error: ConflictError): Response {
   return res.status(409).json({ message: error.message });
 }
 
@@ -22,11 +20,9 @@ export function conflictErrorMessage(
  * @param res
  * @param error
  * @returns
+ * @deprecated Use o middleware global de erros ao invés desta função
  */
-export function notFoundErrorMessage(
-  res: Response,
-  error: NotFoundError
-): Response {
+export function notFoundErrorMessage(res: Response, error: NotFoundError): Response {
   return res.status(404).json({ message: error.message });
 }
 
@@ -35,34 +31,64 @@ export function notFoundErrorMessage(
  * @param res
  * @param error
  * @returns
+ * @deprecated Use o middleware global de erros ao invés desta função
  */
-export function unauthorizedErrorMessage(
-  res: Response,
-  error: NotFoundError
-): Response {
+export function unauthorizedErrorMessage(res: Response, error: NotFoundError): Response {
   return res.status(503).json({ message: error.message });
 }
 
 /**
- * Classe de validação para erros de conflito (Repositories.)
+ * Classe base para erros HTTP customizados
  */
-export class ConflictError extends Error {
-  constructor(message: string) {
+export abstract class HttpError extends Error {
+  constructor(public statusCode: number, message: string) {
     super(message);
-    this.name = "ConflictError";
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NotFoundError";
+/**
+ * Erro de Bad Request (400) - Requisição inválida
+ */
+export class BadRequestError extends HttpError {
+  constructor(message: string = "Requisição inválida") {
+    super(400, message);
   }
 }
 
-export class UnauthorizedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NotFoundError";
+/**
+ * Erro de Unauthorized (401) - Não autenticado
+ */
+export class UnauthorizedError extends HttpError {
+  constructor(message: string = "Não autorizado") {
+    super(401, message);
+  }
+}
+
+/**
+ * Erro de Forbidden (403) - Sem permissão
+ */
+export class ForbiddenError extends HttpError {
+  constructor(message: string = "Acesso negado") {
+    super(403, message);
+  }
+}
+
+/**
+ * Erro de Not Found (404) - Recurso não encontrado
+ */
+export class NotFoundError extends HttpError {
+  constructor(message: string = "Recurso não encontrado") {
+    super(404, message);
+  }
+}
+
+/**
+ * Erro de Conflict (409) - Conflito de dados
+ */
+export class ConflictError extends HttpError {
+  constructor(message: string = "Conflito de dados") {
+    super(409, message);
   }
 }
