@@ -1,196 +1,238 @@
-# 🚀 NOTO - Back-end API
+# 🚀 NOTO - Back-end API (Spring Boot)
 
-> **Sistema de anotações pessoais moderno e seguro** - Inspirado no Notion, desenvolvido com foco em privacidade, performance e arquitetura escalável.
+> **Sistema de anotações pessoais moderno e seguro** - inspirado no Notion, agora refatorado para **Java + Spring Boot** com foco em privacidade, performance e arquitetura escalável.
 
-![Arquitetura NOTO](./docs/image.png)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/Spring_Security-6-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
+[![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200?style=for-the-badge&logo=flyway&logoColor=white)](https://flywaydb.org/)
+[![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org/)
-[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://prisma.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
-
-**Status: ✅ Versão 1.0 Completa e Pronta para Produção**
+**Status: ✅ Refatorado para Spring Boot + PostgreSQL (base funcional da v1 Java)**
 
 - 🌐 [Front-end do projeto](https://github.com/bielsolosos/Noto-Front-end)
 - 📱 [Demo ao vivo](https://noto.bielsolososdev.space/)
 
-## 🏗️ Arquitetura de Produção
+## 🏗️ Arquitetura Atual
 
 ### **Stack Tecnológica**
 
-- **Runtime**: Node.js com TypeScript
-- **Framework**: Express.js com middlewares otimizados
-- **ORM**: Prisma com PostgreSQL
-- **Autenticação**: JWT com refresh tokens
-- **Validação**: Zod schemas
-- **Logs**: Sistema estruturado para auditoria
-- **Documentação**: Swagger/OpenAPI automática
-- **Deploy**: Docker + PM2 para alta disponibilidade
+- **Linguagem**: Java 21
+- **Framework**: Spring Boot 3.5 (Web, Validation, Security, Data JPA)
+- **Banco de dados**: PostgreSQL
+- **Migrações**: Flyway
+- **Autenticação**: JWT (access token) + refresh token
+- **Build**: Maven Wrapper (`mvnw` / `mvnw.cmd`)
+- **Testes**: JUnit 5 (estrutura inicial)
 
-### **Arquitetura Modular (Domain-Driven Design)**
+### **Arquitetura em Camadas (DDD-inspired)**
 
-```
-src/
-├── 🏢 domain/          # Camada de Domínio
-│   ├── models/         # Entidades de negócio
-│   ├── repositories/   # Contratos de persistência
-│   ├── services/       # Regras de negócio
-│   └── validators/     # Validações Zod
-├── 🔧 core/           # Camada de Infraestrutura
-│   ├── config.ts      # Configurações ambiente
-│   ├── prisma.ts      # Cliente do banco
-│   ├── jwtUtils.ts    # Utilitários JWT
-│   ├── bcrypt.ts      # Criptografia
-│   └── logger.ts      # Sistema de logs
-└── 🌐 api/           # Camada de Apresentação
-    ├── controllers/   # Controladores HTTP
-    └── routes/        # Definição de rotas
-```
-
-### **Fluxo de Dados**
-
-1. **Cliente** → **Express Routes** → **Controllers**
-2. **Controllers** → **Domain Services** → **Repositories**
-3. **Repositories** → **Prisma ORM** → **PostgreSQL**
-4. **Logs estruturados** para auditoria e monitoramento
-
-## 🎯 Funcionalidades V1.0
-
-### **🔐 Sistema de Autenticação Completo**
-
-- ✅ Registro e login de usuários
-- ✅ JWT com Access + Refresh Tokens
-- ✅ Middleware de proteção de rotas
-- ✅ Hash seguro de senhas (bcrypt)
-- ✅ Gestão de sessões e expiração
-
-### **📝 CRUD de Páginas Privadas**
-
-- ✅ Criação, leitura, atualização e exclusão de páginas
-- ✅ Conteúdo Markdown suportado
-- ✅ Associação automática ao usuário autenticado
-- ✅ Isolamento total entre usuários
-- ✅ Timestamps automáticos (criação/atualização)
-
-### **👥 Gerenciamento de Usuários**
-
-- ✅ Cadastro com validação de email único
-- ✅ Alteração de senha com verificação
-- ✅ Sistema de roles (user/admin)
-- ✅ Promoção/remoção de privilégios admin
-- ✅ Exclusão de conta com confirmação
-
-### **🛡️ Segurança & Validação**
-
-- ✅ Validação robusta com Zod schemas
-- ✅ Sanitização de dados de entrada
-- ✅ Headers de segurança configurados
-- ✅ Rate limiting para APIs sensíveis
-- ✅ Logs de auditoria para ações críticas
-
-### **📊 Observabilidade**
-
-- ✅ Sistema de logs estruturados
-- ✅ Documentação automática (Swagger)
-- ✅ Monitoramento de performance
-- ✅ Health checks para deploy
-- ✅ Error handling centralizado
-
-## � Deployment & Produção
-
-### **Configuração de Ambiente**
-
-```bash
-# Variáveis essenciais
-DATABASE_URL=postgresql://...
-JWT_SECRET=your-secret-key
-JWT_REFRESH_SECRET=your-refresh-secret
-NODE_ENV=production
-PORT=3000
+```text
+src/main/java/space/bielsolososdev/noto/
+├── api/
+│   ├── annotations/         # Anotações de autorização (@IsAdmin)
+│   ├── controller/rest/     # Endpoints REST
+│   ├── mapper/              # Mapeamento DTO <-> domínio
+│   └── model/               # DTOs de request/response
+├── core/
+│   ├── exception/           # Exceções de negócio e tratamento global
+│   ├── security/            # Configuração de segurança e filtro JWT
+│   └── utils/               # Utilitários (JWT)
+├── domain/
+│   ├── pages/               # Entidade, repositório e serviço de páginas
+│   └── users/               # Entidades, repositórios e serviços de usuários
+└── infrastructure/
+    └── NotoProperties       # Propriedades tipadas da aplicação
 ```
 
-### **Docker & Orquestração**
+### **Fluxo de Requisição**
 
-- 🐳 **Dockerfile otimizado** para produção
-- 🔄 **Docker Compose** com PostgreSQL
-- ⚡ **PM2** para cluster e auto-restart
-- 📈 **Logs centralizados**
+1. **Cliente** envia request com/sem JWT
+2. **SecurityFilterChain** valida rotas públicas e protegidas
+3. **JwtAuthenticationFilter** autentica o usuário via token
+4. **Controller REST** recebe DTO e delega ao serviço
+5. **Service Layer** aplica regras de negócio/permissão
+6. **Repository (JPA)** persiste/consulta no PostgreSQL
+7. **GlobalExceptionHandler** padroniza respostas de erro
 
-## 📈 Estado do Projeto
+## 🎯 Funcionalidades Implementadas
 
-**✅ VERSÃO 1.0 - PRONTA PARA PRODUÇÃO**
+### **🔐 Autenticação e Sessão**
 
-- ✅ Todas as funcionalidades core implementadas
-- ✅ Testes de segurança aprovados
-- ✅ Performance otimizada
-- ✅ Documentação completa
-- ✅ Deploy configurado
+- ✅ Login com usuário/senha
+- ✅ Geração de JWT assinado (HMAC)
+- ✅ Refresh token com rotação (token antigo é consumido)
+- ✅ Rotas protegidas por Spring Security
+- ✅ Senhas protegidas com BCrypt
 
-### **🔮 Roadmap V2.0**
+### **📝 Gestão de Páginas Privadas**
 
-- 🌍 **Páginas Públicas** (sistema de blog)
-- 🏷️ **Sistema de Tags** e categorização
-- 📊 **Dashboard Analytics** para usuários
-- 🔍 **Busca Full-Text** nas anotações
-- 📤 **Export/Import** (JSON, Markdown)
+- ✅ Criar página
+- ✅ Listar páginas do usuário autenticado
+- ✅ Buscar página por ID
+- ✅ Atualizar título/conteúdo
+- ✅ Excluir página
+- ✅ Isolamento entre usuários (validação de permissão por owner)
 
-## 🛠️ Tecnologias & Arquitetura
+### **👤 Gestão de Usuário**
 
-### **Design Patterns Implementados**
+- ✅ Registro (controlado por flag `REGISTRATION_ENABLED`)
+- ✅ Consulta de perfil autenticado (`/api/me`)
+- ✅ Edição de username/email
+- ✅ Alteração de senha com validação da senha atual
+- ✅ Regras de unicidade para username/email
 
-- 🏗️ **Repository Pattern** para abstração de dados
-- 🎯 **Dependency Injection** para testabilidade
-- 🧩 **Service Layer** para lógica de negócio
-- 🔒 **Middleware Pattern** para autenticação
-- 📋 **DTO Pattern** para validação de entrada
+### **🛡️ Administração (ROLE_ADMIN)**
 
-### **Decisões Arquiteturais**
+- ✅ Listagem paginada de usuários com filtros
+- ✅ Edição de credenciais de qualquer usuário
+- ✅ Alteração de senha de usuário
+- ✅ Ativar/desativar conta
+- ✅ Remover usuário
 
-- **TypeScript**: Type safety e melhor DX
-- **Prisma**: ORM moderno com type generation
-- **Express**: Framework maduro e performático
-- **PostgreSQL**: Banco relacional robusto
-- **JWT**: Autenticação stateless e escalável
+### **⚙️ Confiabilidade e Segurança**
+
+- ✅ Validação de entrada com Jakarta Validation
+- ✅ Tratamento global de exceções com respostas padronizadas
+- ✅ Migrações versionadas com Flyway
+- ✅ CORS configurado para front-end local
+
+## 🌐 Endpoints Principais
+
+### **Auth**
+
+- `POST /api/auth/login` - login e emissão de tokens
+- `POST /api/auth/refresh` - renova access token com refresh token
+
+### **Usuário autenticado**
+
+- `GET /api/me` - dados do usuário logado
+- `POST /api/users/change-password` - altera senha própria
+- `POST /api/users/edit-credentials` - altera username/email
+
+### **Cadastro**
+
+- `POST /api/users/register` - cria usuário (quando habilitado)
+
+### **Páginas**
+
+- `GET /api/pages/list` - lista resumida de páginas
+- `GET /api/pages/{id}` - detalhe da página
+- `POST /api/pages` - cria nova página
+- `PUT /api/pages/{id}` - atualiza página
+- `DELETE /api/pages/{id}` - remove página
+
+### **Admin**
+
+- `GET /api/admin/users` - lista paginada com filtros (`filter`, `isActive`, `createdAfter`, `createdBefore`)
+- `GET /api/admin/users/list` - listagem simples (endpoint auxiliar/legado)
+- `PATCH /api/admin/users/{id}/credentials` - edita credenciais
+- `PATCH /api/admin/users/{id}/password` - altera senha
+- `PATCH /api/admin/users/{id}/toggle-active` - ativa/desativa usuário
+- `DELETE /api/admin/users/{id}` - exclui usuário
+
+## 🔧 Configuração de Ambiente
+
+Crie um arquivo `.env` baseado no `.env.example`:
+
+```env
+# Database
+DB_URL=jdbc:postgresql://localhost:5432/noto-db
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+
+# Server
+PORT=8080
+
+# JPA
+SHOW_SQL=false
+
+# JWT
+JWT_SECRET=base64-secret-key
+JWT_EXPIRATION=3600000
+JWT_REFRESH_EXPIRATION=86400000
+
+# App
+REGISTRATION_ENABLED=false
+LOG_LEVEL=DEBUG
+```
 
 ## 🚦 Como Executar
 
-### **Desenvolvimento Local**
+### **Pré-requisitos**
+
+- Java 21+
+- PostgreSQL em execução
+
+### **Desenvolvimento local**
 
 ```bash
-# 1. Clone o repositório
+# 1) Clone o repositório
 git clone https://github.com/bielsolosos/Noto-Back-end.git
+cd Noto-Back-end
 
-# 2. Instale dependências
-npm install
-
-# 3. Configure ambiente
+# 2) Crie o arquivo de ambiente
 cp .env.example .env
 
-# 4. Execute migrações
-npx prisma migrate dev
-
-# 5. Inicie desenvolvimento
-npm run dev
+# 3) Suba a API (Flyway executa automaticamente no startup)
+./mvnw spring-boot:run
 ```
 
-### **Produção com Docker**
+No Windows (Prompt/PowerShell), use:
 
 ```bash
-# Build e deploy
-docker-compose up -d --build
-
-# Verificar saúde
-curl http://localhost:3000/health
+copy .env.example .env
+mvnw.cmd spring-boot:run
 ```
 
-## 📚 Documentação Técnica
+API disponível em: `http://localhost:8080`
 
-- 📖 **API Docs**: `/docs` (Swagger UI)
-- 🗄️ **Prisma Studio**: `npx prisma studio`
+### **Rodar testes**
+
+```bash
+./mvnw test
+```
+
+No Windows:
+
+```bash
+mvnw.cmd test
+```
+
+## 🗄️ Banco de Dados e Migrações
+
+- Migrações em `src/main/resources/db/migration`
+- Versões atuais:
+  - `V1__create_users_table.sql`
+  - `V2__insert_default_admin.sql`
+  - `V3__migrate_to_uuid.sql`
+  - `V4__create_pages_table.sql`
+
+### **Usuário admin padrão (ambiente dev)**
+
+- **Login**: `admin`
+- **Senha**: `admin123`
+
+> Recomenda-se alterar a senha do admin imediatamente após o primeiro login em qualquer ambiente real.
+
+## 📌 Observações Importantes
+
+- O refresh token atual é mantido em memória da aplicação (in-memory). Em ambiente distribuído/escala horizontal, o ideal é persistir em Redis ou banco.
+- O cadastro público pode ser desligado com `REGISTRATION_ENABLED=false`.
+- No estado atual, não há Swagger/OpenAPI nem Actuator expostos.
+
+## 🔮 Roadmap (Próximos Passos)
+
+- 📖 Documentação OpenAPI/Swagger
+- ❤️ Health checks e observabilidade com Actuator
+- 🧪 Testes de integração para fluxos críticos
+- 📦 Persistência de refresh token (Redis/PostgreSQL)
+- 🗂️ Exposição de endpoints de arquivamento de páginas
 
 ---
 
-**🎯 NOTO V1.0 - Sistema de Anotações de Produção**
+**🎯 NOTO - Back-end Java/Spring Boot**
 
 Criado com ❤️ por **[bielsolosos](https://discord.com/users/bielsolosos)**
 
