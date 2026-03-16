@@ -190,6 +190,15 @@ API disponível em: `http://localhost:8080`
 
 ### **Rodar testes**
 
+Os testes usam sempre o profile `test` e um PostgreSQL externo. Configure as variaveis abaixo no ambiente:
+
+```env
+TEST_DB_URL=jdbc:postgresql://localhost:5432/noto-test-db
+TEST_DB_USERNAME=postgres
+TEST_DB_PASSWORD=postgres
+TEST_SHOW_SQL=false
+```
+
 ```bash
 ./mvnw test
 ```
