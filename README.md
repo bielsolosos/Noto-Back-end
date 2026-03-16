@@ -9,8 +9,7 @@
 [![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200?style=for-the-badge&logo=flyway&logoColor=white)](https://flywaydb.org/)
 [![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 
-**Status: ✅ Refatorado para Spring Boot + PostgreSQL (base funcional da v1 Java)**
-
+[V1 do Projeto com Express e Typescript](https://github.com/bielsolosos/Noto-Back-end/tree/release-1)
 - 🌐 [Front-end do projeto](https://github.com/bielsolosos/Noto-Front-end)
 - 📱 [Demo ao vivo](https://noto.bielsolososdev.space/)
 
