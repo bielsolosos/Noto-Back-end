@@ -3,20 +3,16 @@ package space.bielsolososdev.noto.domain.pages.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.BeanUtils;
 import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.pages.model.Page;
 import space.bielsolososdev.noto.domain.pages.repository.PageRepository;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.service.UserService;
 
-import javax.swing.text.html.Option;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +20,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PageServiceTest {
