@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -190,10 +191,108 @@ class UserServiceTest {
     }
 
     @Test
-    void editUser() {
+    void editUserSuccess() {
+        when(repository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(repository.save(user)).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+
+        // Abrir o bloco para métodos estáticos
+        try (MockedStatic<SecurityContextHolder> mockedSecurity = mockStatic(SecurityContextHolder.class)) {
+            mockedSecurity.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.isAuthenticated()).thenReturn(true);
+            when(authentication.getName()).thenReturn(user.getUsername());
+            when(repository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+
+            User userNovo = userService.editUser(user.getId(), "USERNAME NOVO", "EMAILNOVO@GMAIL.COM");
+            assertNotNull(userNovo);
+        }
+
     }
 
     @Test
-    void getEntity() {
+    void editUserThrowsBusinessExceptionUsername() {
+        when(repository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+
+        try (MockedStatic<SecurityContextHolder> mockedSecurity = mockStatic(SecurityContextHolder.class)) {
+            mockedSecurity.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.isAuthenticated()).thenReturn(true);
+            when(authentication.getName()).thenReturn(user.getUsername());
+            when(repository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+            when(repository.findByUsername(secondUser.getUsername())).thenReturn(Optional.of(secondUser));
+
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> userService.editUser(user.getId(), secondUser.getUsername(), "email-novo@gmail.com"));
+
+            assertEquals("Nome de usuário já existente", exception.getMessage());
+            verify(repository, never()).save(any(User.class));
+        }
     }
+
+    @Test
+    void editUserThrowsBusinessExceptionEmail() {
+        when(repository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+
+        try (MockedStatic<SecurityContextHolder> mockedSecurity = mockStatic(SecurityContextHolder.class)) {
+            mockedSecurity.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.isAuthenticated()).thenReturn(true);
+            when(authentication.getName()).thenReturn(user.getUsername());
+            when(repository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+            when(repository.findByEmail(secondUser.getEmail())).thenReturn(Optional.of(secondUser));
+
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> userService.editUser(user.getId(), user.getUsername(), secondUser.getEmail()));
+
+            assertEquals("Email já existente", exception.getMessage());
+            verify(repository, never()).save(any(User.class));
+        }
+    }
+
+    @Test
+    void editUserWithoutPermission() {
+        when(repository.findById(secondUser.getId())).thenReturn(Optional.of(secondUser));
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+
+        // Abrir o bloco para métodos estáticos
+        try (MockedStatic<SecurityContextHolder> mockedSecurity = mockStatic(SecurityContextHolder.class)) {
+            mockedSecurity.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.isAuthenticated()).thenReturn(true);
+            when(authentication.getName()).thenReturn(user.getUsername());
+            when(repository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+
+            assertThrows(BadCredentialsException.class, () -> userService.editUser(secondUser.getId(), "USERNAME NOVO", "EMAILNOVO@GMAIL.COM"));
+        }
+
+    }
+
+
+    @Test
+    void getEntitySuccess() {
+        when(repository.findById(user.getId())).thenReturn(Optional.of(user));
+        User entity = userService.getEntity(this.user.getId());
+        verify(repository, times(1)).findById(this.user.getId());
+        assertNotNull(entity);
+        assertTrue(entity.equals(user));
+    }
+
+    @Test
+    void getEntityFailed() {
+        when(repository.findById(user.getId())).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> userService.getEntity(this.user.getId()));
+
+    }
+
 }
