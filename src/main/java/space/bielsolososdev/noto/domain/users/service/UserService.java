@@ -117,7 +117,8 @@ public class UserService {
     }
 
     private void verifyUserIntegrity(User entity) {
-        if (!entity.getId().equals(getMe().getId())) {
+        User me = this.getMe();
+        if (!entity.getId().equals(me.getId())) {
             throw new BadCredentialsException("Sem permissão.");
         }
     }
