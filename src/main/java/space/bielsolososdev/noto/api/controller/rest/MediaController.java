@@ -2,12 +2,12 @@ package space.bielsolososdev.noto.api.controller.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import space.bielsolososdev.noto.api.model.media.MediaRequest;
 import space.bielsolososdev.noto.api.model.media.MediaResponse;
 import space.bielsolososdev.noto.domain.media.service.MediaService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/media")
@@ -18,7 +18,12 @@ public class MediaController {
 
     @PostMapping("/upload")
     public ResponseEntity<MediaResponse> addMedia(MediaRequest media) {
-        System.out.println(media.file());
         return ResponseEntity.ok(mediaService.upload(media));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMedia(@PathVariable UUID id) {
+        mediaService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

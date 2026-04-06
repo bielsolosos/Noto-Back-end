@@ -1,17 +1,27 @@
 package space.bielsolososdev.noto.domain.media.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import space.bielsolososdev.noto.api.model.media.MediaRequest;
 import space.bielsolososdev.noto.api.model.media.MediaResponse;
+import space.bielsolososdev.noto.core.exception.BusinessException;
+import space.bielsolososdev.noto.domain.media.model.MediaR2;
+import space.bielsolososdev.noto.domain.media.repository.MediaR2Repository;
 import space.bielsolososdev.noto.domain.media.service.MediaService;
+import space.bielsolososdev.noto.domain.users.model.User;
+import space.bielsolososdev.noto.domain.users.service.UserService;
 import space.bielsolososdev.noto.infrastructure.R2Properties;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,41 +30,45 @@ public class MediaServiceR2Impl implements MediaService {
 
     private final S3Client s3Client;
     private final R2Properties r2Properties;
-    // private final MediaRepository mediaRepository; // Injete seu repositório aqui
+    private final MediaR2Repository repository;
+    private final UserService userService;
 
     @Override
     public MediaResponse upload(MediaRequest media) {
         var file = media.file();
-        // 1. Gerar nome único para evitar sobrescrever arquivos
+
+        List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
+
+        if (!allowedTypes.contains(file.getContentType())) {
+            throw new BusinessException("Apenas imagens (JPEG, PNG, WEBP) são permitidas!");
+        }
+
+
         String extension = getFileExtension(file.getOriginalFilename());
         String key = UUID.randomUUID() + extension;
 
         try {
-            // 2. Preparar o Upload para o R2
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(r2Properties.getBucketName())
                     .key(key)
                     .contentType(file.getContentType())
                     .build();
 
-            // 3. Enviar o arquivo
-            s3Client.putObject(putObjectRequest,
-                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            // 4. Montar a URL e o Markdown
             String finalUrl = r2Properties.getPublicUrlBase() + "/" + key;
             String markdown = String.format("![%s](%s)", file.getOriginalFilename(), finalUrl);
 
-            // 5. Salvar no Banco (Metadados)
-            // Aqui você chamaria o repository.save(...) usando o media.userId()
 
-            return new MediaResponse(
-                    UUID.randomUUID(), // Trocar pelo ID gerado pelo banco após o save
-                    key,
-                    finalUrl,
-                    markdown,
-                    OffsetDateTime.now()
-            );
+            MediaR2 entity = repository.save(MediaR2.builder()
+                    .url(finalUrl)
+                    .user(userService.getMe())
+                    .createdAt(OffsetDateTime.now())
+                    .filename(key)
+                    .sizeBytes(file.getSize())
+                    .build());
+
+            return new MediaResponse(entity.getId(), key, finalUrl, markdown, entity.getCreatedAt());
 
         } catch (IOException e) {
             throw new RuntimeException("Erro ao processar upload de imagem", e);
@@ -65,5 +79,32 @@ public class MediaServiceR2Impl implements MediaService {
         if (fileName == null) return "";
         int lastIndex = fileName.lastIndexOf(".");
         return (lastIndex == -1) ? "" : fileName.substring(lastIndex);
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        User me = userService.getMe();
+
+        MediaR2 media = repository.findById(id)
+                .orElseThrow(() -> new BusinessException("Imagem não encontrada"));
+
+        if (!me.equals(media.getUser())) {
+            throw new BusinessException("Você não tem permissão para deletar.");
+        }
+
+        try {
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(r2Properties.getBucketName())
+                    .key(media.getFilename())
+                    .build();
+
+            s3Client.deleteObject(deleteRequest);
+
+            repository.delete(media);
+
+        } catch (S3Exception e) {
+            throw new BusinessException("Erro ao deletar arquivo no R2", e);
+        }
     }
 }
