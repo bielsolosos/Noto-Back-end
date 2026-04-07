@@ -1,7 +1,6 @@
 package space.bielsolososdev.noto.domain.users.service;
 
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,8 +57,8 @@ class UserServiceTest {
         roleAdmin.setDescription("Administrador do sistema");
 
         roles = Set.of(roleUser, roleAdmin);
-        user = new User(UUID.randomUUID(), "primary-user", "primary-email@gmail.com", "senha",  OffsetDateTime.now(),  OffsetDateTime.now().minusDays(20), true, roles, new ArrayList<>());
-        secondUser = new User(UUID.randomUUID(), "secondary-user", "secondary-email@gmail.com", "senha",  OffsetDateTime.now(),  OffsetDateTime.now().minusDays(30), true, Set.of(roleUser), new ArrayList<>());
+        user = new User(UUID.randomUUID(), "primary-user", "primary-email@gmail.com", "senha",  OffsetDateTime.now(),  OffsetDateTime.now().minusDays(20), true, roles, null, new ArrayList<>());
+        secondUser = new User(UUID.randomUUID(), "secondary-user", "secondary-email@gmail.com", "senha",  OffsetDateTime.now(),  OffsetDateTime.now().minusDays(30), true, Set.of(roleUser), null, new ArrayList<>());
 
     }
 
@@ -296,3 +295,4 @@ class UserServiceTest {
     }
 
 }
+

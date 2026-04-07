@@ -8,6 +8,7 @@ public record UserResponse(
         UUID id,
         String username,
         String email,
+        String profileImageUrl,
         boolean isActive,
         OffsetDateTime createdAt,
         Set<String> roles

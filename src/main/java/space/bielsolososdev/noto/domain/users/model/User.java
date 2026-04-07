@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import space.bielsolososdev.noto.domain.media.model.MediaR2;
 import space.bielsolososdev.noto.domain.pages.model.Page;
 
 import java.time.OffsetDateTime;
@@ -56,6 +57,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "profile_media_id")
+    private MediaR2 profileMedia;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Page> pages = new ArrayList<>();

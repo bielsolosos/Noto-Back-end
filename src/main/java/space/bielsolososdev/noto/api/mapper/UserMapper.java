@@ -14,6 +14,7 @@ public class UserMapper {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getProfileMedia() != null ? user.getProfileMedia().getUrl() : null,
                 user.isActive(),
                 user.getCreatedAt(),
                 user.getRoles().stream().map(r -> r.getName()).collect(Collectors.toSet())

@@ -24,3 +24,10 @@ spring:
     database:
       replace: none
 
+r2:
+  endpoint: ${TEST_R2_ENDPOINT:https://example.r2.cloudflarestorage.com}
+  access-key: ${TEST_R2_ACCESS_KEY:test-access-key}
+  secret-key: ${TEST_R2_SECRET_KEY:test-secret-key}
+  bucket-name: ${TEST_R2_BUCKET_NAME:test-bucket}
+  public-url-base: ${TEST_R2_PUBLIC_URL_BASE:https://cdn.example.com}
+

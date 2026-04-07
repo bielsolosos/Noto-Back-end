@@ -26,6 +26,13 @@ spring:
 server:
   port: ${PORT:8080}
 
+r2:
+  endpoint: ${R2_ENDPOINT:}
+  access-key: ${R2_ACCESS_KEY:}
+  secret-key: ${R2_SECRET_KEY:}
+  bucket-name: ${R2_BUCKET_NAME:}
+  public-url-base: ${R2_PUBLIC_URL_BASE:}
+
 noto:
   jwt:
     secret: ${JWT_SECRET:q9xAoDjLAZsb2eM8olOfxmDYn+0f7bRUIgNEN/l+Vjp5erGN64kzEF5hXGqdxpJ9XoJCIrposVrRmBLp2+TQxQ==}

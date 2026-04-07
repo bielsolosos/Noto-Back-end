@@ -8,13 +8,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import space.bielsolososdev.noto.api.model.MessageResponse;
+import space.bielsolososdev.noto.api.model.media.MediaRequest;
 import space.bielsolososdev.noto.api.model.user.ChangePasswordRequest;
 import space.bielsolososdev.noto.api.model.user.CreateUserRequest;
 import space.bielsolososdev.noto.api.model.user.EditUserRequest;
 import space.bielsolososdev.noto.api.model.user.UserResponse;
 import space.bielsolososdev.noto.core.exception.BusinessException;
+import space.bielsolososdev.noto.domain.media.service.MediaService;
 import space.bielsolososdev.noto.domain.users.model.Role;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.service.UserService;
@@ -34,6 +37,8 @@ class UserControllerTest {
     private UserService userService;
     @Mock
     private NotoProperties props;
+    @Mock
+    private MediaService mediaService;
 
     @InjectMocks
     private UserController controller;
@@ -82,9 +87,36 @@ class UserControllerTest {
         assertNotNull(response.getBody());
         assertEquals(user.getId(), response.getBody().id());
         assertEquals("biel", response.getBody().username());
+        assertNull(response.getBody().profileImageUrl());
         verify(userService, times(1)).editUser(user.getId(), request.username(), request.email());
     }
 
+    @Test
+    void uploadProfileImageSuccess() {
+        MultipartFile file = mock(MultipartFile.class);
+        MediaRequest request = new MediaRequest(file);
+
+        UserResponse updatedUser = new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                "https://cdn.example.com/avatar.webp",
+                user.isActive(),
+                user.getCreatedAt(),
+                Set.of("ROLE_USER")
+        );
+
+        when(mediaService.uploadProfileImage(request)).thenReturn(updatedUser);
+
+        ResponseEntity<UserResponse> response = controller.uploadProfileImage(request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("https://cdn.example.com/avatar.webp", response.getBody().profileImageUrl());
+        verify(mediaService, times(1)).uploadProfileImage(request);
+    }
+
+  
     @Test
     void createUserRegistrationDisabled() {
         CreateUserRequest request = new CreateUserRequest("biel", "biel@email.com", "senha123", "senha123");
@@ -117,6 +149,7 @@ class UserControllerTest {
         assertNotNull(response.getBody());
         assertEquals(user.getId(), response.getBody().id());
         assertEquals("biel", response.getBody().username());
+        assertNull(response.getBody().profileImageUrl());
         verify(userService, times(1)).createUser(request.username(), request.email(), request.password());
     }
 }
