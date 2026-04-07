@@ -51,6 +51,7 @@ class CustomUserDetailsServiceTest {
                 null,
                 true,
                 Set.of(userRole, adminRole),
+                null,
                 new ArrayList<>()
         );
 
@@ -63,6 +64,7 @@ class CustomUserDetailsServiceTest {
                 null,
                 false,
                 Set.of(userRole),
+                null,
                 new ArrayList<>()
         );
     }
