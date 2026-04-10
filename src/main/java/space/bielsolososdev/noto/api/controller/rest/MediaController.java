@@ -25,7 +25,6 @@ public class MediaController {
         return ResponseEntity.ok(response);
     }
 
-    //TODO migrar para ter apenas parametros normais
     @PostMapping("/upload")
     public ResponseEntity<MediaResponse> addMedia(MediaRequest media) {
         return ResponseEntity.ok(MediaMapper.toResponse(mediaService.upload(media.file())));
