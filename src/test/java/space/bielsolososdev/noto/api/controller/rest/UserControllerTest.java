@@ -17,9 +17,10 @@ import space.bielsolososdev.noto.api.model.user.CreateUserRequest;
 import space.bielsolososdev.noto.api.model.user.EditUserRequest;
 import space.bielsolososdev.noto.api.model.user.UserResponse;
 import space.bielsolososdev.noto.core.exception.BusinessException;
-import space.bielsolososdev.noto.domain.media.service.MediaService;
+import space.bielsolososdev.noto.domain.media.model.MediaR2;
 import space.bielsolososdev.noto.domain.users.model.Role;
 import space.bielsolososdev.noto.domain.users.model.User;
+import space.bielsolososdev.noto.domain.users.service.MeService;
 import space.bielsolososdev.noto.domain.users.service.UserService;
 import space.bielsolososdev.noto.infrastructure.NotoProperties;
 
@@ -36,9 +37,9 @@ class UserControllerTest {
     @Mock
     private UserService userService;
     @Mock
-    private NotoProperties props;
+    private MeService meService;
     @Mock
-    private MediaService mediaService;
+    private NotoProperties props;
 
     @InjectMocks
     private UserController controller;
@@ -64,7 +65,7 @@ class UserControllerTest {
     @Test
     void changePasswordSuccess() {
         ChangePasswordRequest request = new ChangePasswordRequest("senha123", "nova123");
-        when(userService.getMe()).thenReturn(user);
+        when(meService.getMe()).thenReturn(user);
         when(userService.changePassword(user.getId(), request.oldPassword(), request.newPassword())).thenReturn(user);
 
         ResponseEntity<MessageResponse> response = controller.changePassword(request);
@@ -78,7 +79,7 @@ class UserControllerTest {
     @Test
     void editUserSuccess() {
         EditUserRequest request = new EditUserRequest("novo-username", "novo@email.com");
-        when(userService.getMe()).thenReturn(user);
+        when(meService.getMe()).thenReturn(user);
         when(userService.editUser(user.getId(), request.username(), request.email())).thenReturn(user);
 
         ResponseEntity<UserResponse> response = controller.editUser(request);
@@ -96,6 +97,10 @@ class UserControllerTest {
         MultipartFile file = mock(MultipartFile.class);
         MediaRequest request = new MediaRequest(file);
 
+        MediaR2 profileMedia = new MediaR2();
+        profileMedia.setUrl("https://cdn.example.com/avatar.webp");
+        user.setProfileMedia(profileMedia);
+
         UserResponse updatedUser = new UserResponse(
                 user.getId(),
                 user.getUsername(),
@@ -106,14 +111,14 @@ class UserControllerTest {
                 Set.of("ROLE_USER")
         );
 
-        when(mediaService.uploadProfileImage(request)).thenReturn(updatedUser);
+        when(userService.uploadProfileImage(file)).thenReturn(user);
 
         ResponseEntity<UserResponse> response = controller.uploadProfileImage(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("https://cdn.example.com/avatar.webp", response.getBody().profileImageUrl());
-        verify(mediaService, times(1)).uploadProfileImage(request);
+        verify(userService, times(1)).uploadProfileImage(file);
     }
 
   

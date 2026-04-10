@@ -1,4 +1,4 @@
-package space.bielsolososdev.noto.api.mapper;
+package space.bielsolososdev.noto.api.mapper.page;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

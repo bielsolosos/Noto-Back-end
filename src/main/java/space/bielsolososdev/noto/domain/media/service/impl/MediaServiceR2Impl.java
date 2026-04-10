@@ -2,23 +2,23 @@ package space.bielsolososdev.noto.domain.media.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
-import space.bielsolososdev.noto.api.mapper.UserMapper;
-import space.bielsolososdev.noto.api.model.media.MediaRequest;
-import space.bielsolososdev.noto.api.model.media.MediaResponse;
-import space.bielsolososdev.noto.api.model.user.UserResponse;
 import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.media.model.MediaR2;
 import space.bielsolososdev.noto.domain.media.repository.MediaR2Repository;
+import space.bielsolososdev.noto.domain.media.repository.specification.MediaSpecification;
 import space.bielsolososdev.noto.domain.media.service.MediaService;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.repository.UserRepository;
-import space.bielsolososdev.noto.domain.users.service.UserService;
+import space.bielsolososdev.noto.domain.users.service.MeService;
 import space.bielsolososdev.noto.infrastructure.R2Properties;
 
 import java.io.IOException;
@@ -34,33 +34,12 @@ public class MediaServiceR2Impl implements MediaService {
     private final S3Client s3Client;
     private final R2Properties r2Properties;
     private final MediaR2Repository repository;
-    private final UserService userService;
+    private final MeService meService;
     private final UserRepository userRepository;
 
     @Override
-    public MediaResponse upload(MediaRequest media) {
-        return uploadForUser(media, userService.getMe());
-    }
-
-    @Override
-    @Transactional
-    public UserResponse uploadProfileImage(MediaRequest media) {
-        User me = userService.getMe();
-        MediaR2 previousProfileMedia = me.getProfileMedia();
-
-        MediaResponse uploaded = uploadForUser(media, me);
-        MediaR2 newProfileMedia = repository.findById(uploaded.id())
-                .orElseThrow(() -> new BusinessException("Imagem recém-enviada não encontrada"));
-
-        me.setProfileMedia(newProfileMedia);
-        userRepository.save(me);
-
-        if (previousProfileMedia != null) {
-            deleteObject(previousProfileMedia.getFilename());
-            repository.delete(previousProfileMedia);
-        }
-
-        return UserMapper.toUserResponse(me);
+    public MediaR2 upload(MultipartFile media) {
+        return uploadForUser(media, meService.getMe());
     }
 
     private String getFileExtension(String fileName) {
@@ -72,7 +51,7 @@ public class MediaServiceR2Impl implements MediaService {
     @Override
     @Transactional
     public void delete(UUID id) {
-        User me = userService.getMe();
+        User me = meService.getMe();
 
         MediaR2 media = repository.findById(id)
                 .orElseThrow(() -> new BusinessException("Imagem não encontrada"));
@@ -96,9 +75,14 @@ public class MediaServiceR2Impl implements MediaService {
         }
     }
 
-    private MediaResponse uploadForUser(MediaRequest media, User user) {
-        var file = media.file();
+    @Override
+    public Page<MediaR2> listPageable(Pageable pageable, String filter) {
+        MediaSpecification specification = new MediaSpecification(filter);
+        return repository.findAll(specification, pageable);
+    }
 
+    @Override
+    public MediaR2 uploadForUser(MultipartFile file, User user) {
         List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
 
         if (file == null || file.isEmpty()) {
@@ -113,31 +97,22 @@ public class MediaServiceR2Impl implements MediaService {
         String key = UUID.randomUUID() + extension;
 
         try {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(r2Properties.getBucketName())
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .build();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(r2Properties.getBucketName()).key(key).contentType(file.getContentType()).build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
             String finalUrl = r2Properties.getPublicUrlBase() + "/" + key;
-            String markdown = String.format("![%s](%s)", file.getOriginalFilename(), finalUrl);
 
-            MediaR2 entity = repository.save(MediaR2.builder()
-                    .url(finalUrl)
-                    .user(user)
-                    .createdAt(OffsetDateTime.now())
-                    .filename(key)
-                    .sizeBytes(file.getSize())
-                    .contentType(file.getContentType())
-                    .build());
-
-            return new MediaResponse(entity.getId(), key, finalUrl, markdown, entity.getCreatedAt());
+            return repository.save(MediaR2.builder().url(finalUrl).user(user).createdAt(OffsetDateTime.now()).filename(key).sizeBytes(file.getSize()).contentType(file.getContentType()).build());
 
         } catch (IOException e) {
             throw new RuntimeException("Erro ao processar upload de imagem", e);
         }
+    }
+
+    @Override
+    public MediaR2 getMedia(UUID id) {
+        return repository.findById(id).orElseThrow(() -> new BusinessException("Media não encontrada"));
     }
 
     private void deleteObject(String key) {

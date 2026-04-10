@@ -1,4 +1,4 @@
-package space.bielsolososdev.noto.api.mapper;
+package space.bielsolososdev.noto.api.mapper.page;
 
 import lombok.experimental.UtilityClass;
 import space.bielsolososdev.noto.api.model.page.PageSummaryResponse;

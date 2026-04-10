@@ -25,17 +25,17 @@ public class AdminUserService {
 
     public Page<User> listUsers(Pageable pageable, String filter, Boolean isActive,
                                 LocalDateTime createdAfter, LocalDateTime createdBefore) {
-        var spec = new UserSpecification(filter, isActive, createdAfter, createdBefore);
+        UserSpecification spec = new UserSpecification(filter, isActive, createdAfter, createdBefore);
         return repository.findAll(spec, pageable);
     }
 
     public User toggleUserActive(UUID id) {
         log.debug("Alternando status ativo do usuário com ID: {}", id);
 
-        var user = userService.getEntity(id);
+        User user = userService.getEntity(id);
         user.setActive(!user.isActive());
 
-        var savedUser = repository.save(user);
+        User savedUser = repository.save(user);
         log.info("Status do usuário {} alterado para: {}",
                 user.getUsername(), user.isActive() ? "ATIVO" : "INATIVO");
 
@@ -45,7 +45,7 @@ public class AdminUserService {
     public void deleteUser(UUID id) {
         log.debug("Tentativa de deletar usuário com ID: {}", id);
 
-        var user = userService.getEntity(id);
+        User user = userService.getEntity(id);
         repository.delete(user);
 
         log.warn("Usuário {} (ID: {}) foi DELETADO do sistema", user.getUsername(), id);
@@ -54,17 +54,17 @@ public class AdminUserService {
     public User adminChangePassword(UUID id, String newPassword) {
         log.debug("Admin alterando senha do usuário com ID: {}", id);
 
-        var user = userService.getEntity(id);
+        User user = userService.getEntity(id);
         user.setPassword(passwordEncoder.encode(newPassword));
 
-        var savedUser = repository.save(user);
+        User savedUser = repository.save(user);
         log.info("Senha do usuário {} alterada por administrador", user.getUsername());
 
         return savedUser;
     }
 
     public User adminEditUser(UUID id, String username, String email) {
-        var entity = userService.getEntity(id);
+        User entity = userService.getEntity(id);
 
         if (!entity.getUsername().equals(username)) {
             repository.findByUsername(username).ifPresent(u -> {
@@ -81,7 +81,7 @@ public class AdminUserService {
         entity.setUsername(username);
         entity.setEmail(email);
 
-        var savedUser = repository.save(entity);
+        User savedUser = repository.save(entity);
         log.info("Admin atualizou usuário {}: username='{}', email='{}'", id, username, email);
 
         return savedUser;

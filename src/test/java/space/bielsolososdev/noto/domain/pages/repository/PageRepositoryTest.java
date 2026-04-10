@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import space.bielsolososdev.noto.api.mapper.PageRequest;
+import space.bielsolososdev.noto.api.mapper.page.PageRequest;
 import space.bielsolososdev.noto.api.model.user.CreateUserRequest;
 import space.bielsolososdev.noto.domain.pages.model.Page;
 import space.bielsolososdev.noto.domain.users.model.Role;
