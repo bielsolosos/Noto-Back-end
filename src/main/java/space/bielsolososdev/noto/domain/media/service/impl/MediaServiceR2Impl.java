@@ -3,6 +3,7 @@ package space.bielsolososdev.noto.domain.media.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -97,7 +98,7 @@ public class MediaServiceR2Impl implements MediaService {
     }
 
     private MediaResponse uploadForUser(MediaRequest media, User user) {
-        var file = media.file();
+        MultipartFile file = media.file();
 
         List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
 

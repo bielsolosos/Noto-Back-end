@@ -3,6 +3,7 @@ package space.bielsolososdev.noto.domain.users.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class UserService {
 
     public User getMe() {
         log.debug("Buscando informações do usuário autenticado");
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("Tentativa de acesso sem autenticação válida");
@@ -43,7 +44,7 @@ public class UserService {
     public User changePassword(UUID id, String oldPassword, String newPassword) {
         log.debug("Tentativa de alteração de senha para o usuário com ID: {}", id);
 
-        var user = repository.findById(id).orElseThrow(() -> {
+        User user = repository.findById(id).orElseThrow(() -> {
             log.error("Usuário com ID {} não encontrado ao tentar alterar senha", id);
             return new BusinessException("User não encontrado");
         });
@@ -54,7 +55,7 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        var savedUser = repository.save(user);
+        User savedUser = repository.save(user);
 
         log.info("Senha alterada com sucesso para o usuário: {}", user.getUsername());
         return savedUser;
@@ -73,20 +74,20 @@ public class UserService {
             throw new BusinessException("E-mail já está em uso");
         }
 
-        var entity = new User();
+        User entity = new User();
         entity.setEmail(email);
         entity.setUsername(username);
         entity.setPassword(passwordEncoder.encode(password));
         entity.getRoles().add(roleRepository.findByName("ROLE_USER").get());
 
-        var savedUser = repository.save(entity);
+        User savedUser = repository.save(entity);
         log.info("Novo usuário criado com sucesso: {} (ID: {})", username, savedUser.getId());
 
         return savedUser;
     }
 
     public User editUser(UUID id, String username, String email) {
-        var entity = getEntity(id);
+        User entity = getEntity(id);
 
         verifyUserIntegrity(entity);
 
@@ -105,7 +106,7 @@ public class UserService {
         entity.setUsername(username);
         entity.setEmail(email);
 
-        var savedUser = repository.save(entity);
+        User savedUser = repository.save(entity);
         log.info("Usuário {} atualizado com sucesso: username='{}', email='{}'", id, username, email);
 
         return savedUser;

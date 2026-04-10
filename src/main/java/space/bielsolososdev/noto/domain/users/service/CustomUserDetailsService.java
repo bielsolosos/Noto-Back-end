@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.repository.UserRepository;
 
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         return org.springframework.security.core.userdetails.User
