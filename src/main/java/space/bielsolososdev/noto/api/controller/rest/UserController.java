@@ -14,7 +14,7 @@ import space.bielsolososdev.noto.api.model.user.CreateUserRequest;
 import space.bielsolososdev.noto.api.model.user.EditUserRequest;
 import space.bielsolososdev.noto.api.model.user.UserResponse;
 import space.bielsolososdev.noto.core.exception.BusinessException;
-import space.bielsolososdev.noto.domain.media.service.MediaService;
+import space.bielsolososdev.noto.domain.users.service.MeService;
 import space.bielsolososdev.noto.domain.users.service.UserService;
 import space.bielsolososdev.noto.infrastructure.NotoProperties;
 
@@ -24,11 +24,12 @@ import space.bielsolososdev.noto.infrastructure.NotoProperties;
 public class UserController {
 
     private final UserService service;
+    private final MeService meService;
     private final NotoProperties props;
 
     @PostMapping("/change-password")
     public ResponseEntity<MessageResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        service.changePassword(service.getMe().getId(), request.oldPassword(), request.newPassword());
+        service.changePassword(meService.getMe().getId(), request.oldPassword(), request.newPassword());
         return ResponseEntity.ok(new MessageResponse("Senha alterada com sucesso"));
     }
     
@@ -36,7 +37,7 @@ public class UserController {
     public ResponseEntity<UserResponse> editUser(@Valid @RequestBody EditUserRequest request) {
         return ResponseEntity.ok(
                 UserMapper.toUserResponse(
-                        service.editUser(service.getMe().getId(), request.username(), request.email())
+                        service.editUser(meService.getMe().getId(), request.username(), request.email())
                 )
         );
     }

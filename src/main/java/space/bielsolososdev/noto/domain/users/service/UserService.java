@@ -1,13 +1,15 @@
 package space.bielsolososdev.noto.domain.users.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import space.bielsolososdev.noto.core.exception.BusinessException;
+import space.bielsolososdev.noto.domain.media.model.MediaR2;
+import space.bielsolososdev.noto.domain.media.service.MediaService;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.repository.RoleRepository;
 import space.bielsolososdev.noto.domain.users.repository.UserRepository;
@@ -22,24 +24,9 @@ public class UserService {
     private final UserRepository repository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MediaService mediaService;
+    private final MeService meService;
 
-    public User getMe() {
-        log.debug("Buscando informações do usuário autenticado");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Tentativa de acesso sem autenticação válida");
-            throw new BusinessException("Usuário não autenticado");
-        }
-
-        String username = authentication.getName();
-        log.info("Usuário '{}' acessando seu próprio perfil", username);
-
-        return repository.findByUsername(username).orElseThrow(() -> {
-            log.error("Usuário autenticado '{}' não encontrado no banco de dados", username);
-            return new BusinessException("Usuário não encontrado");
-        });
-    }
 
     public User changePassword(UUID id, String oldPassword, String newPassword) {
         log.debug("Tentativa de alteração de senha para o usuário com ID: {}", id);
@@ -118,10 +105,28 @@ public class UserService {
     }
 
     private void verifyUserIntegrity(User entity) {
-        User me = this.getMe();
+        User me = meService.getMe();
         if (!entity.getId().equals(me.getId())) {
             throw new BadCredentialsException("Sem permissão.");
         }
     }
+
+    @Transactional
+    public User uploadProfileImage(MultipartFile media) {
+        User me = meService.getMe();
+        MediaR2 previousProfileMedia = me.getProfileMedia();
+
+        MediaR2 uploaded = mediaService.uploadForUser(media, me);
+
+        me.setProfileMedia(uploaded);
+        User entity = repository.save(me);
+
+        if (previousProfileMedia != null) {
+            mediaService.delete(previousProfileMedia.getId());
+        }
+
+        return entity;
+    }
+
 }
 

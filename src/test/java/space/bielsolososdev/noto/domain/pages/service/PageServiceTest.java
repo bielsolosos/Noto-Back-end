@@ -10,7 +10,7 @@ import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.pages.model.Page;
 import space.bielsolososdev.noto.domain.pages.repository.PageRepository;
 import space.bielsolososdev.noto.domain.users.model.User;
-import space.bielsolososdev.noto.domain.users.service.UserService;
+import space.bielsolososdev.noto.domain.users.service.MeService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,7 +28,7 @@ class PageServiceTest {
     private PageRepository pageRepository;
 
     @Mock
-    private UserService userService;
+    private MeService meService;
 
     @InjectMocks
     private PageService pageService;
@@ -60,7 +60,7 @@ class PageServiceTest {
     @Test
     void getById_deveRetornarPagina_quandoUsuarioEhDono() {
         when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
 
         Page resultado = pageService.getById(pageId);
 
@@ -69,7 +69,7 @@ class PageServiceTest {
         assertEquals("Minha Nota", resultado.getTitle());
 
         verify(pageRepository, times(1)).findById(pageId);
-        verify(userService, times(1)).getMe();
+        verify(meService, times(1)).getMe();
     }
 
     @Test
@@ -81,22 +81,22 @@ class PageServiceTest {
 
         assertEquals("Página não encontrada no sistema.", ex.getMessage());
         verify(pageRepository, times(1)).findById(pageId);
-        verifyNoMoreInteractions(userService);
+        verifyNoMoreInteractions(meService);
     }
 
     @Test
     void getById_deveLancarExcecao_quandoUsuarioNaoEhDono() {
         when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(otherUser);
+        when(meService.getMe()).thenReturn(otherUser);
 
         assertThrows(BusinessException.class, () -> pageService.getById(pageId));
 
-        verify(userService, times(1)).getMe();
+        verify(meService, times(1)).getMe();
     }
 
     @Test
     void createPageSuccessfullyWithoutParams() {
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Page page = pageService.createPage(null, null);
@@ -104,12 +104,12 @@ class PageServiceTest {
         assertTrue(page.getTitle().contains("Nova Nota dia:"));
         assertTrue(page.getContent().isEmpty());
         verify(pageRepository, times(1)).save(any(Page.class));
-        verify(userService, times(1)).getMe();
+        verify(meService, times(1)).getMe();
     }
 
     @Test
     void createPageSuccessfullyWithParams() {
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Page page = pageService.createPage("PageTeste", "Conteúdo Diferentão");
@@ -118,13 +118,13 @@ class PageServiceTest {
         assertEquals("Conteúdo Diferentão", page.getContent());
 
         verify(pageRepository, times(1)).save(any(Page.class));
-        verify(userService, times(1)).getMe();
+        verify(meService, times(1)).getMe();
     }
 
     @Test
     void updateContentSucessfullyWithoutTitle(){
         when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         final String UPDATED_CONTENT = "NOVO CONTEÚDO ATUALIZADO";
@@ -138,7 +138,7 @@ class PageServiceTest {
     @Test
     void updateContentSucessfullyWithTitle(){
         when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         final String UPDATED_CONTENT = "NOVO CONTEÚDO ATUALIZADO";
@@ -152,7 +152,7 @@ class PageServiceTest {
 
     @Test
     void getAllOrderedByUpdatedAtDesc() {
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
 
         Page maisAntiga = new Page();
         maisAntiga.setTitle("Antiga");
@@ -180,7 +180,7 @@ class PageServiceTest {
 
     @Test
     void getAllOrderedByUpdatedAtDescArchived() {
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
 
         Page maisAntiga = new Page();
         maisAntiga.setTitle("Antiga");
@@ -208,7 +208,7 @@ class PageServiceTest {
     @Test
     void assertPageIsArchived() {
         when(pageRepository.findById(page.getId())).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         pageService.archivePage(page.getId());
@@ -219,7 +219,7 @@ class PageServiceTest {
     @Test
     void assertPageIsUnarchived() {
         when(pageRepository.findById(page.getId())).thenReturn(Optional.of(page));
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.save(any(Page.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         pageService.unarchivePage(page.getId());
@@ -229,7 +229,7 @@ class PageServiceTest {
 
     @Test
     void assertDeletePage(){
-        when(userService.getMe()).thenReturn(owner);
+        when(meService.getMe()).thenReturn(owner);
         when(pageRepository.findById(page.getId())).thenReturn(Optional.of(page));
         pageService.delete(page.getId());
 
@@ -239,7 +239,7 @@ class PageServiceTest {
 
     @Test
     void assertCantDeletePage(){
-        when(userService.getMe()).thenReturn(otherUser);
+        when(meService.getMe()).thenReturn(otherUser);
         when(pageRepository.findById(page.getId())).thenReturn(Optional.of(page));
 
         // O assertThrows garante que a BusinessException seja lançada

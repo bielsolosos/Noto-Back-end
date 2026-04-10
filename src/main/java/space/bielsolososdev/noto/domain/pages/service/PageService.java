@@ -6,7 +6,7 @@ import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.pages.model.Page;
 import space.bielsolososdev.noto.domain.pages.repository.PageRepository;
 import space.bielsolososdev.noto.domain.users.model.User;
-import space.bielsolososdev.noto.domain.users.service.UserService;
+import space.bielsolososdev.noto.domain.users.service.MeService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PageService {
 
-    private final UserService userService;
+    private final MeService meService;
     private final PageRepository repository;
 
     public Page getById(UUID id) {
@@ -32,7 +32,7 @@ public class PageService {
 
     public Page createPage(String title, String content) {
         Page page = new Page();
-        page.setUser(userService.getMe());
+        page.setUser(meService.getMe());
         page.setTitle(title == null ? String.format("Nova Nota dia: %s", OffsetDateTime.now().toLocalDateTime().toString()) : title);
         page.setContent(content == null ? "" : content);
         return repository.save(page);
@@ -52,11 +52,11 @@ public class PageService {
     }
 
     public List<Page> getAll() {
-        return repository.findByUserIdOrderByUpdatedAtDesc(userService.getMe().getId());
+        return repository.findByUserIdOrderByUpdatedAtDesc(meService.getMe().getId());
     }
 
     public List<Page> getAllArchivedPages() {
-        return repository.findByUserIdAndArchivedTrueOrderByUpdatedAtDesc(userService.getMe().getId());
+        return repository.findByUserIdAndArchivedTrueOrderByUpdatedAtDesc(meService.getMe().getId());
     }
 
     // TODO Add
@@ -76,7 +76,7 @@ public class PageService {
         repository.save(entity);
     }
     public void delete(UUID id) {
-        User me = userService.getMe();
+        User me = meService.getMe();
         Page entity = findById(id);
         validatePermission(entity, me);
         repository.delete(entity);
@@ -84,7 +84,7 @@ public class PageService {
 
 
     private void validatePermission(UUID id, Page entity) {
-        User me = userService.getMe();
+        User me = meService.getMe();
         if (!entity.getUser().getId().equals(me.getId())) {
             throw new BusinessException(String.format("Usuário %s não tem permissão para editar a página de Id: %s", me.getUsername(), id));
         }
