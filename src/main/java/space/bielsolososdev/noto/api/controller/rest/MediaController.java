@@ -1,8 +1,11 @@
 package space.bielsolososdev.noto.api.controller.rest;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import space.bielsolososdev.noto.api.mapper.page.MediaMapper;
 import space.bielsolososdev.noto.api.model.media.MediaRequest;
 import space.bielsolososdev.noto.api.model.media.MediaResponse;
 import space.bielsolososdev.noto.domain.media.service.MediaService;
@@ -16,9 +19,16 @@ public class MediaController {
 
     private final MediaService mediaService;
 
+    @GetMapping
+    public ResponseEntity<Page<MediaResponse>> listAllMedia(Pageable pageable,@RequestParam(required = false) String filter) {
+        Page<MediaResponse> response = mediaService.listPageable(pageable, filter).map(MediaMapper::toResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    //TODO migrar para ter apenas parametros normais
     @PostMapping("/upload")
     public ResponseEntity<MediaResponse> addMedia(MediaRequest media) {
-        return ResponseEntity.ok(mediaService.upload(media));
+        return ResponseEntity.ok(MediaMapper.toResponse(mediaService.upload(media.file())));
     }
 
     @DeleteMapping("/{id}")

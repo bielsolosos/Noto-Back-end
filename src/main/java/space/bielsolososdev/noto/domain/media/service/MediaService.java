@@ -1,16 +1,22 @@
 package space.bielsolososdev.noto.domain.media.service;
 
-import space.bielsolososdev.noto.api.model.media.MediaRequest;
-import space.bielsolososdev.noto.api.model.media.MediaResponse;
-import space.bielsolososdev.noto.api.model.user.UserResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+import space.bielsolososdev.noto.domain.media.model.MediaR2;
+import space.bielsolososdev.noto.domain.users.model.User;
 
 import java.util.UUID;
 
 public interface MediaService {
 
-    MediaResponse upload(MediaRequest media);
-
-    UserResponse uploadProfileImage(MediaRequest media);
+    MediaR2 upload(MultipartFile media);
 
     void delete(UUID id);
+
+    Page<MediaR2> listPageable(Pageable pageable, String filter);
+
+    MediaR2 uploadForUser(MultipartFile media, User me);
+
+    MediaR2 getMedia(UUID id);
 }
