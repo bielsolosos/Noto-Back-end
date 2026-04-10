@@ -1,4 +1,4 @@
-package space.bielsolososdev.noto.api.mapper;
+package space.bielsolososdev.noto.api.mapper.user;
 
 import space.bielsolososdev.noto.api.model.user.UserResponse;
 import space.bielsolososdev.noto.domain.users.model.User;

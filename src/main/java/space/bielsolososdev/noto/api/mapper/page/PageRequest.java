@@ -1,4 +1,4 @@
-package space.bielsolososdev.noto.api.mapper;
+package space.bielsolososdev.noto.api.mapper.page;
 
 public record PageRequest(
         String title,

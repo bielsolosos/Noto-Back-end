@@ -9,7 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import space.bielsolososdev.noto.api.annotations.IsAdmin;
-import space.bielsolososdev.noto.api.mapper.UserMapper;
+import space.bielsolososdev.noto.api.mapper.user.UserMapper;
 import space.bielsolososdev.noto.api.model.MessageResponse;
 import space.bielsolososdev.noto.api.model.user.ChangePasswordRequest;
 import space.bielsolososdev.noto.api.model.user.EditUserRequest;

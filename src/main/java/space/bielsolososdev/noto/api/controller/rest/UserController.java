@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import space.bielsolososdev.noto.api.mapper.UserMapper;
+import space.bielsolososdev.noto.api.mapper.user.UserMapper;
 import space.bielsolososdev.noto.api.model.MessageResponse;
 import space.bielsolososdev.noto.api.model.media.MediaRequest;
 import space.bielsolososdev.noto.api.model.user.ChangePasswordRequest;
@@ -24,7 +24,6 @@ import space.bielsolososdev.noto.infrastructure.NotoProperties;
 public class UserController {
 
     private final UserService service;
-    private final MediaService mediaService;
     private final NotoProperties props;
 
     @PostMapping("/change-password")
@@ -44,7 +43,7 @@ public class UserController {
 
     @PostMapping("/profile-image")
     public ResponseEntity<UserResponse> uploadProfileImage(@ModelAttribute MediaRequest mediaRequest) {
-        return ResponseEntity.ok(mediaService.uploadProfileImage(mediaRequest));
+        return ResponseEntity.ok(UserMapper.toUserResponse(service.uploadProfileImage(mediaRequest.file())));
     }
 
     @PostMapping("/register")
