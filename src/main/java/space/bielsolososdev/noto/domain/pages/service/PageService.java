@@ -2,8 +2,13 @@ package space.bielsolososdev.noto.domain.pages.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import space.bielsolososdev.noto.core.enums.ExportTypeEnum;
+import space.bielsolososdev.noto.core.enums.MimeTypeEnum;
 import space.bielsolososdev.noto.core.exception.BusinessException;
+import space.bielsolososdev.noto.domain.pages.export.factory.ExportPageFactory;
+import space.bielsolososdev.noto.domain.pages.export.service.PageExporterService;
 import space.bielsolososdev.noto.domain.pages.model.Page;
+import space.bielsolososdev.noto.domain.pages.model.dto.PageToExportDto;
 import space.bielsolososdev.noto.domain.pages.repository.PageRepository;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.service.MeService;
@@ -94,5 +99,21 @@ public class PageService {
         if (!entity.getUser().getId().equals(me.getId())) {
             throw new BusinessException(String.format("Usuário %s não tem permissão para editar a página de Id", me.getUsername()));
         }
+    }
+
+    public PageToExportDto exportPage(UUID id, ExportTypeEnum type) {
+        Page entity = this.findById(id);
+
+        ExportPageFactory factory = new ExportPageFactory();
+
+        PageExporterService pageExporterService = factory.generatePageService(type);
+
+        byte[] fileBytes = pageExporterService.getBytesFromPage(entity);
+
+        String fileName = pageExporterService.getFileName(entity);
+
+        MimeTypeEnum mimeType = pageExporterService.getMimeType();
+
+        return new PageToExportDto(fileName, mimeType, fileBytes.length, fileBytes);
     }
 }
