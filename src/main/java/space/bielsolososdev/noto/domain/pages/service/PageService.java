@@ -102,7 +102,7 @@ public class PageService {
     }
 
     public PageToExportDto exportPage(UUID id, ExportTypeEnum type) {
-        Page entity = this.findById(id);
+        Page entity = this.getById(id);
 
         ExportPageFactory factory = new ExportPageFactory();
 
