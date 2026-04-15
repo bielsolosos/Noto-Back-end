@@ -154,13 +154,31 @@ public class PageExporterServiceNotoPdf implements PageExporterService {
             
                             /* Imagens (Sem Flexbox, centralizado via block/text-align) */
                             .markdown-img-container {
+                        display: block;
                                 text-align: center;
-                                margin: 20px 0;
+                                margin: 25px auto;
+                        
+                                /* Essa regra avisa o PDF: "Não corte a imagem no meio entre duas páginas" */
                                 page-break-inside: avoid;
                             }
                             .markdown-img {
-                                max-width: 100%;
-                                border: 1px solid #e5e7eb;
+                                /* Regra 1: Nunca ultrapassar as margens laterais */
+                                        max-width: 100%;\s
+            
+                                        /* Regra 2: A MÁGICA! Limitar a altura máxima.\s
+                                           Uma folha A4 tem cerca de 1000px úteis. Limitando a 450px,\s
+                                           garantimos que a imagem nunca consuma mais que meia página,\s
+                                           sobrando espaço para o texto colar nela! */
+                                        max-height: 450px;\s
+            
+                                        /* Regra 3: Manter a proporção para não achatar a imagem */
+                                        width: auto;
+                                        height: auto;
+            
+                                        /* Frescurinhas visuais */
+                                        border: 1px solid #d1d5db;
+                                        border-radius: 4px;
+                                        box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* O PDF entende box-shadow simples! */
                             }
                         </style>
                         </head>
