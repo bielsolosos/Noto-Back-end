@@ -11,12 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     
     services:
-      # Sobe um banco temporário para os testes de integração, se necessário
+      # Sobe um banco temporário para os testes de integração
       postgres:
         image: postgres:15-alpine
         env:
           POSTGRES_DB: noto_test
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: test
+        # O health check garante que o banco esteja pronto antes dos testes começarem
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432
 
@@ -24,24 +31,31 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Importante para o Sonar ler o histórico do Git
+          fetch-depth: 0 
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21' # Ou a versão que você usa
+          java-version: '21' 
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Rodar Testes Unitários
-        run: mvn test
+      - name: Rodar Testes e Gerar Relatório JaCoCo
+        # Usamos o 'verify' para garantir que o JaCoCo gere o XML antes do Sonar subir os dados
+        run: mvn -B clean verify
+        env:
+          # Variáveis para o Spring Boot conseguir conectar no banco do Service acima
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/noto_test
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: test
 
       - name: Análise com SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B verify sonar:sonar \
+          mvn sonar:sonar \
           -Dsonar.projectKey=bielsolosos_Noto-Back-end \
           -Dsonar.organization=bielsolosos \
-          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
