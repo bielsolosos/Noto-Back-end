@@ -1,4 +1,4 @@
-package space.bielsolososdev.noto.domain.pages.utils;
+package space.bielsolososdev.noto.domain.pages.export.pdfProviders;
 
 import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.ext.tables.TableCell;
