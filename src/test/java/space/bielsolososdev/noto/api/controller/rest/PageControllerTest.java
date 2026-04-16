@@ -135,8 +135,9 @@ class PageControllerTest {
         String contentDisposition = response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
         assertNotNull(contentDisposition);
         assertTrue(contentDisposition.contains("attachment"));
-        assertTrue(contentDisposition.contains("filename") || contentDisposition.contains("filename*"));
-        assertTrue(contentDisposition.contains(".md"));
+        assertTrue(contentDisposition.contains("filename=\"Export Minha Nota.md\""));
+        assertTrue(contentDisposition.contains("filename*=UTF-8''Export%20Minha%20Nota.md"));
+        assertFalse(contentDisposition.contains("=?UTF-8?Q?"));
         assertArrayEquals(content, ((ByteArrayResource) response.getBody()).getByteArray());
         verify(pageService, times(1)).exportPage(pageId, ExportTypeEnum.MD);
     }
