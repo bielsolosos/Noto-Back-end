@@ -1,0 +1,47 @@
+name: CI - Backend Quality Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-analyze:
+    runs-on: ubuntu-latest
+    
+    services:
+      # Sobe um banco temporário para os testes de integração, se necessário
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: noto_test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Importante para o Sonar ler o histórico do Git
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21' # Ou a versão que você usa
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Rodar Testes Unitários
+        run: mvn test
+
+      - name: Análise com SonarCloud
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B verify sonar:sonar \
+          -Dsonar.projectKey=bielsolosos_Noto-Back-end \
+          -Dsonar.organization=bielsolosos \
+          -Dsonar.host.url=https://sonarcloud.io
