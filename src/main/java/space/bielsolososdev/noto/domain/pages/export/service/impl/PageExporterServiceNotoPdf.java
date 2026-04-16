@@ -11,8 +11,8 @@ import space.bielsolososdev.noto.domain.pages.export.enums.TemplatePathEnum;
 import space.bielsolososdev.noto.domain.pages.export.utils.TemplateLoaderUtils;
 import space.bielsolososdev.noto.domain.pages.export.service.PageExporterService;
 import space.bielsolososdev.noto.domain.pages.model.Page;
-import space.bielsolososdev.noto.domain.pages.utils.NotoAttributeProvider;
-import space.bielsolososdev.noto.domain.pages.utils.NotoNodeRenderer;
+import space.bielsolososdev.noto.domain.pages.export.pdfProviders.NotoAttributeProvider;
+import space.bielsolososdev.noto.domain.pages.export.pdfProviders.NotoNodeRenderer;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
