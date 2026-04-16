@@ -4,11 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriUtils;
 import space.bielsolososdev.noto.api.mapper.page.PageMapper;
 import space.bielsolososdev.noto.api.mapper.page.PageRequest;
 import space.bielsolososdev.noto.api.mapper.page.PageResponse;
@@ -58,12 +58,15 @@ public class PageController {
     public ResponseEntity<Resource> exportPage(@PathVariable UUID id, @RequestParam ExportTypeEnum type) {
         PageToExportDto pojo = service.exportPage(id, type);
 
-        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                .filename(pojo.fileName(), StandardCharsets.UTF_8)
-                .build();
+        String encodedFileName = UriUtils.encode(pojo.fileName(), StandardCharsets.UTF_8);
+        String contentDisposition = String.format(
+                "attachment; filename=\"%s\"; filename*=UTF-8''%s",
+                pojo.fileName().replace("\"", ""),
+                encodedFileName
+        );
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                 .contentType(MediaType.parseMediaType(pojo.mimeType().getMimeType()))
                 .contentLength(pojo.contentLength())
                 .body(new ByteArrayResource(pojo.resource()));
