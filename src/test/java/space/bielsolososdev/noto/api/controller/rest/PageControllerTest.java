@@ -6,15 +6,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import space.bielsolososdev.noto.api.mapper.page.PageRequest;
 import space.bielsolososdev.noto.api.mapper.page.PageResponse;
 import space.bielsolososdev.noto.api.model.MessageResponse;
 import space.bielsolososdev.noto.api.model.page.PageSummaryResponse;
+import space.bielsolososdev.noto.core.enums.ExportTypeEnum;
+import space.bielsolososdev.noto.core.enums.MimeTypeEnum;
+import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.pages.model.Page;
+import space.bielsolososdev.noto.domain.pages.model.dto.PageToExportDto;
 import space.bielsolososdev.noto.domain.pages.service.PageService;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -109,5 +118,38 @@ class PageControllerTest {
         assertEquals(page.getId(), response.getBody().id());
         assertEquals(page.getTitle(), response.getBody().title());
         verify(pageService, times(1)).createPage(request.title(), request.content());
+    }
+
+    @Test
+    void exportPageSuccess() {
+        byte[] content = "# Minha Nota\n\nConteúdo".getBytes(StandardCharsets.UTF_8);
+        PageToExportDto dto = new PageToExportDto("Export Minha Nota.md", MimeTypeEnum.MARKDOWN, content.length, content);
+        when(pageService.exportPage(pageId, ExportTypeEnum.MD)).thenReturn(dto);
+
+        ResponseEntity<Resource> response = controller.exportPage(pageId, ExportTypeEnum.MD);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(MediaType.parseMediaType("text/markdown"), response.getHeaders().getContentType());
+        assertEquals(content.length, response.getHeaders().getContentLength());
+        String contentDisposition = response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        assertNotNull(contentDisposition);
+        assertTrue(contentDisposition.contains("attachment"));
+        assertTrue(contentDisposition.contains("filename=\"Export Minha Nota.md\""));
+        assertTrue(contentDisposition.contains("filename*=UTF-8''Export%20Minha%20Nota.md"));
+        assertFalse(contentDisposition.contains("=?UTF-8?Q?"));
+        assertArrayEquals(content, ((ByteArrayResource) response.getBody()).getByteArray());
+        verify(pageService, times(1)).exportPage(pageId, ExportTypeEnum.MD);
+    }
+
+    @Test
+    void exportPageShouldPropagateBusinessException() {
+        when(pageService.exportPage(pageId, ExportTypeEnum.NOTO_PDF)).thenThrow(new BusinessException("sem permissão"));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> controller.exportPage(pageId, ExportTypeEnum.NOTO_PDF));
+
+        assertEquals("sem permissão", ex.getMessage());
+        verify(pageService, times(1)).exportPage(pageId, ExportTypeEnum.NOTO_PDF);
     }
 }

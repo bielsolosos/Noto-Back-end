@@ -6,13 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import space.bielsolososdev.noto.core.enums.ExportTypeEnum;
+import space.bielsolososdev.noto.core.enums.MimeTypeEnum;
 import space.bielsolososdev.noto.core.exception.BusinessException;
 import space.bielsolososdev.noto.domain.pages.model.Page;
+import space.bielsolososdev.noto.domain.pages.model.dto.PageToExportDto;
 import space.bielsolososdev.noto.domain.pages.repository.PageRepository;
 import space.bielsolososdev.noto.domain.users.model.User;
 import space.bielsolososdev.noto.domain.users.service.MeService;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +28,33 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PageServiceTest {
+
+    private static final String RICH_MARKDOWN_CONTENT = String.join("\n",
+            "Introducao com **negrito**, *italico* e `inline code`.",
+            "",
+            "## Checklist",
+            "- [x] Item concluido",
+            "- [ ] Item pendente",
+            "",
+            "## Tabela",
+            "| Nome | Valor |",
+            "|---|---:|",
+            "| Taxa | 12.5 |",
+            "",
+            "> Bloco de citacao para custom renderer",
+            "",
+            "```java",
+            "public class Demo {",
+            "    public static void main(String[] args) {",
+            "        System.out.println(\"ok\");",
+            "    }",
+            "}",
+            "```",
+            "",
+            "Link util: [Noto](https://example.com)",
+            "",
+            "![Imagem de teste](https://example.com/image.png)"
+    );
 
     @Mock
     private PageRepository pageRepository;
@@ -53,7 +85,7 @@ class PageServiceTest {
         page = new Page();
         page.setId(pageId);
         page.setTitle("Minha Nota");
-        page.setContent("Conteúdo da nota");
+        page.setContent(RICH_MARKDOWN_CONTENT);
         page.setUser(owner);
     }
 
@@ -250,6 +282,62 @@ class PageServiceTest {
         // O findById é chamado para validar, mas o delete NÃO pode ser chamado
         verify(pageRepository, times(1)).findById(page.getId());
         verify(pageRepository, never()).delete(any(Page.class));
+    }
+
+    @Test
+    void exportPageMdSuccessfully() {
+        when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
+        when(meService.getMe()).thenReturn(owner);
+
+        PageToExportDto dto = pageService.exportPage(pageId, ExportTypeEnum.MD);
+
+        assertNotNull(dto);
+        assertEquals("Export Minha Nota.md", dto.fileName());
+        assertEquals(MimeTypeEnum.MARKDOWN, dto.mimeType());
+        assertEquals(dto.contentLength(), dto.resource().length);
+        assertEquals("# Minha Nota\n\n" + RICH_MARKDOWN_CONTENT, new String(dto.resource(), StandardCharsets.UTF_8));
+        verify(pageRepository, times(1)).findById(pageId);
+        verify(meService, times(1)).getMe();
+    }
+
+    @Test
+    void exportPagePdfSuccessfully() {
+        when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
+        when(meService.getMe()).thenReturn(owner);
+
+        PageToExportDto dto = pageService.exportPage(pageId, ExportTypeEnum.NOTO_PDF);
+
+        assertNotNull(dto);
+        assertEquals("Export Minha Nota.pdf", dto.fileName());
+        assertEquals(MimeTypeEnum.PDF, dto.mimeType());
+        assertEquals(dto.contentLength(), dto.resource().length);
+        assertTrue(dto.resource().length > 4);
+        assertEquals("%PDF", new String(Arrays.copyOf(dto.resource(), 4), StandardCharsets.US_ASCII));
+        verify(pageRepository, times(1)).findById(pageId);
+        verify(meService, times(1)).getMe();
+    }
+
+    @Test
+    void exportPageShouldThrowWhenPageNotFound() {
+        when(pageRepository.findById(pageId)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> pageService.exportPage(pageId, ExportTypeEnum.MD));
+
+        assertEquals("Página não encontrada no sistema.", ex.getMessage());
+        verify(pageRepository, times(1)).findById(pageId);
+        verifyNoMoreInteractions(meService);
+    }
+
+    @Test
+    void exportPageShouldThrowWhenUserHasNoPermission() {
+        when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
+        when(meService.getMe()).thenReturn(otherUser);
+
+        assertThrows(BusinessException.class, () -> pageService.exportPage(pageId, ExportTypeEnum.MD));
+
+        verify(pageRepository, times(1)).findById(pageId);
+        verify(meService, times(1)).getMe();
     }
 
 }
