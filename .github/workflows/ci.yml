@@ -6,19 +6,33 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: temurin
+
 jobs:
-  test-and-analyze:
+  verify:
+    name: Verify (tests + coverage)
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 25
+
     services:
-      # Sobe um banco temporário para os testes de integração
+      # Banco temporario para os testes de integracao
       postgres:
         image: postgres:15-alpine
         env:
           POSTGRES_DB: noto_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: test
-        # O health check garante que o banco esteja pronto antes dos testes começarem
+        # Garante que o banco esteja pronto antes dos testes
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -27,35 +41,152 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      # Variaveis para o Spring Boot conectar no banco do service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/noto_test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: test
+
     steps:
-      - name: Checkout código
+      - name: Checkout codigo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 1
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21' 
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
           cache: 'maven'
 
-      - name: Rodar Testes e Gerar Relatório JaCoCo
-        # Usamos o 'verify' para garantir que o JaCoCo gere o XML antes do Sonar subir os dados
+      - name: Rodar testes e validar cobertura
         run: mvn -B clean verify
-        env:
-          # Variáveis para o Spring Boot conseguir conectar no banco do Service acima
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/noto_test
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: test
 
-      - name: Análise com SonarCloud
+      - name: Publicar relatorio JaCoCo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jacoco-report
+          path: |
+            target/site/jacoco/jacoco.xml
+            target/site/jacoco/index.html
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publicar relatorios de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-surefire-reports
+          path: target/surefire-reports/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Resumo do verify
+        run: |
+          {
+            echo "## Backend Verify"
+            echo "- Testes: concluidos"
+            echo "- Cobertura JaCoCo: validada"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-package:
+    name: Build package test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Build da aplicacao (sem testes)
+        run: mvn -B -DskipTests clean package
+
+      - name: Publicar JAR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: target/*.jar
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Resumo do build
+        run: |
+          {
+            echo "## Backend Build"
+            echo "- Package (skipTests): concluido"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  sonarcloud:
+    name: SonarCloud (informativo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: verify
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'maven'
+
+      - name: Restaurar relatorio JaCoCo
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jacoco-report
+          path: target/site/jacoco
+
+      - name: Verificar configuracao SonarCloud
+        id: sonar-config
+        shell: bash
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [[ -n "$SONAR_TOKEN" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "enabled=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "## SonarCloud"
+            echo "Analise pulada: configure o secret SONAR_TOKEN."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Analise SonarCloud (informativa)
+        if: ${{ steps.sonar-config.outputs.enabled == 'true' }}
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar \
+          mvn -B -DskipTests test-compile sonar:sonar \
           -Dsonar.projectKey=bielsolosos_Noto-Back-end \
           -Dsonar.organization=bielsolosos \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
+      - name: Resumo do SonarCloud
+        if: ${{ steps.sonar-config.outputs.enabled == 'true' }}
+        run: |
+          {
+            echo "## SonarCloud"
+            echo "Analise executada em modo informativo (nao bloqueante)."
+          } >> "$GITHUB_STEP_SUMMARY"
