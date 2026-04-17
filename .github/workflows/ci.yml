@@ -2,9 +2,9 @@ name: CI - Backend Quality Gate
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop, master ]
 
 concurrency:
   group: backend-ci-${{ github.workflow }}-${{ github.ref }}

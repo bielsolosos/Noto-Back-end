@@ -8,7 +8,7 @@ Este documento explica como funciona o CI do back-end, quais etapas bloqueiam me
 - Nome: `CI - Backend Quality Gate`
 - Gatilhos:
   - Push: `main`, `develop`
-  - Pull request: `main`
+  - Pull request: `main`, `develop`
 
 ## Jobs e Steps
 
