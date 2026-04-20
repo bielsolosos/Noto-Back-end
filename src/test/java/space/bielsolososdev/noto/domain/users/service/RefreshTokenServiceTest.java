@@ -3,12 +3,21 @@ package space.bielsolososdev.noto.domain.users.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import space.bielsolososdev.noto.domain.users.model.RefreshToken;
+import space.bielsolososdev.noto.domain.users.model.User;
+import space.bielsolososdev.noto.domain.users.repository.RefreshTokenRepository;
+import space.bielsolososdev.noto.domain.users.repository.UserRepository;
 import space.bielsolososdev.noto.infrastructure.NotoProperties;
 
+import java.time.Instant;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenServiceTest {
@@ -17,41 +26,62 @@ class RefreshTokenServiceTest {
     private NotoProperties properties;
     @Mock
     private NotoProperties.Jwt jwtProperties;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
 
     private RefreshTokenService refreshTokenService;
 
     @BeforeEach
     void setUp() {
-        when(properties.getJwt()).thenReturn(jwtProperties);
-        when(jwtProperties.getRefreshExpiration()).thenReturn(60_000L);
-        refreshTokenService = new RefreshTokenService(properties);
+        refreshTokenService = new RefreshTokenService(properties, userRepository, refreshTokenRepository);
     }
 
     @Test
     void createRefreshTokenSuccess() {
-        String token1 = refreshTokenService.createRefreshToken("biel");
-        String token2 = refreshTokenService.createRefreshToken("biel");
+        when(properties.getJwt()).thenReturn(jwtProperties);
+        when(jwtProperties.getRefreshExpiration()).thenReturn(60_000L);
 
-        assertNotNull(token1);
-        assertNotNull(token2);
-        assertFalse(token1.isBlank());
-        assertFalse(token2.isBlank());
-        assertNotEquals(token1, token2);
+        User user = new User();
+        user.setUsername("biel");
+        when(userRepository.findByUsername("biel")).thenReturn(Optional.of(user));
+
+        String token = refreshTokenService.createRefreshToken("biel");
+
+        assertNotNull(token);
+        assertFalse(token.isBlank());
+
+        ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokenRepository).save(tokenCaptor.capture());
+        RefreshToken savedToken = tokenCaptor.getValue();
+        assertEquals("biel", savedToken.getUser().getUsername());
+        assertEquals(token, savedToken.getToken());
+        assertTrue(savedToken.getExpiresAt().isAfter(Instant.now()));
     }
 
     @Test
     void validateAndConsumeSuccess() {
-        String token = refreshTokenService.createRefreshToken("biel");
+        String token = "refresh-token";
+        User user = new User();
+        user.setUsername("biel");
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(token);
+        refreshToken.setUser(user);
+        refreshToken.setExpiresAt(Instant.now().plusSeconds(60));
+        when(refreshTokenRepository.findByTokenForUpdate(token)).thenReturn(Optional.of(refreshToken));
 
         String username = refreshTokenService.validateAndConsume(token);
 
         assertEquals("biel", username);
+        verify(refreshTokenRepository).delete(refreshToken);
     }
 
     @Test
     void validateAndConsumeAlreadyConsumedToken() {
-        String token = refreshTokenService.createRefreshToken("biel");
-        refreshTokenService.validateAndConsume(token);
+        String token = "already-consumed";
+        when(refreshTokenRepository.findByTokenForUpdate(token)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -59,13 +89,20 @@ class RefreshTokenServiceTest {
         );
 
         assertEquals("Refresh token inválido ou já utilizado", ex.getMessage());
+        verify(refreshTokenRepository, never()).delete(any(RefreshToken.class));
     }
 
     @Test
     void validateAndConsumeExpiredToken() {
-        when(jwtProperties.getRefreshExpiration()).thenReturn(-1L);
-        refreshTokenService = new RefreshTokenService(properties);
-        String token = refreshTokenService.createRefreshToken("biel");
+        String token = "expired-token";
+        User user = new User();
+        user.setUsername("biel");
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(token);
+        refreshToken.setUser(user);
+        refreshToken.setExpiresAt(Instant.now().minusSeconds(1));
+        when(refreshTokenRepository.findByTokenForUpdate(token)).thenReturn(Optional.of(refreshToken));
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -73,20 +110,15 @@ class RefreshTokenServiceTest {
         );
 
         assertEquals("Refresh token expirado", ex.getMessage());
+        verify(refreshTokenRepository).delete(refreshToken);
     }
 
     @Test
     void cleanupExpiredTokensRemovesExpiredToken() {
-        when(jwtProperties.getRefreshExpiration()).thenReturn(-1L);
-        refreshTokenService = new RefreshTokenService(properties);
-        String token = refreshTokenService.createRefreshToken("biel");
+        when(refreshTokenRepository.deleteByExpiresAtBefore(any(Instant.class))).thenReturn(1L);
 
         refreshTokenService.cleanupExpiredTokens();
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> refreshTokenService.validateAndConsume(token)
-        );
-        assertEquals("Refresh token inválido ou já utilizado", ex.getMessage());
+        verify(refreshTokenRepository).deleteByExpiresAtBefore(any(Instant.class));
     }
 }
