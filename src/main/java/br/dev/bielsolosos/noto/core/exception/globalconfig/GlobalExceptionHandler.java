@@ -1,5 +1,6 @@
 package br.dev.bielsolosos.noto.core.exception.globalconfig;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", "Rota não encontrada: " + request.getRequestURI()));
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<Void> handleRateLimitException(RequestNotPermitted ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
     @ExceptionHandler(Exception.class)

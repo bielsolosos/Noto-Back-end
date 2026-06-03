@@ -2,7 +2,6 @@ package br.dev.bielsolosos.noto.api.controller.rest;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import br.dev.bielsolosos.noto.domain.users.model.dto.LoginRequest;
@@ -18,7 +17,7 @@ public class AuthRestController {
     private final AuthService service;
 
     @PostMapping("/login")
-    @RateLimiter(name = "public-routes", fallbackMethod = "mensagemMaluca")
+    @RateLimiter(name = "public-routes")
     public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(service.login(request));
     }
@@ -28,9 +27,5 @@ public class AuthRestController {
         return ResponseEntity.ok(service.refresh(request));
     }
 
-    @SuppressWarnings("unused")
-    public ResponseEntity<TokenResponse> mensagemMaluca(LoginRequest request, Throwable throwable) {
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
-    }
 }
 
