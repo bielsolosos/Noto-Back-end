@@ -40,7 +40,18 @@ noto:
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
   registration-enabled: ${REGISTRATION_ENABLED:false}
 
+resilience4j:
+  ratelimiter:
+    configs:
+      default:
+        registerHealthIndicator: true
+    instances:
+      public-routes:
+        limitForPeriod: 3        # Permite 30 requisições...
+        limitRefreshPeriod: 1m    # ...a cada 1 minuto (por instância da aplicação)
+        timeoutDuration: 0s
+
 logging:
   level:
     root: INFO
-    "space.bielsolososdev.noto": ${LOG_LEVEL:DEBUG}
+    "br.dev.bielsolosos.noto": ${LOG_LEVEL:DEBUG}
