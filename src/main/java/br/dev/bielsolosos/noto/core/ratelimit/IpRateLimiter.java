@@ -9,8 +9,20 @@ import java.lang.annotation.Target;
 import br.dev.bielsolosos.noto.core.ratelimit.enums.IpRateLimitConfigEnum;
 
 /**
- * Annotation to apply rate limiting based on client IP (for anonymous routes)
- * or Username (for authenticated routes) via Resilience4j.
+ * <b>Papel da Classe:</b>
+ * Anotação de marcação para habilitar o controle de taxa (Rate Limiting) de forma dinâmica
+ * a nível de classe (Controller) ou de método (Endpoint).
+ * <p>
+ * <b>Como funciona:</b>
+ * Quando aplicada, o {@link IpRateLimitInterceptor} intercepta as requisições destinadas ao endpoint
+ * anotado, lê a configuração definida no atributo {@code value()} e aplica a lógica de limitação.
+ * Se o limite for excedido, uma exceção {@code RequestNotPermitted} é lançada e capturada globalmente.
+ * <p>
+ * <b>Dependências:</b>
+ * <ul>
+ *   <li>{@link IpRateLimitConfigEnum}: Enumeração das configurações válidas (ex: PUBLIC_ROUTES, PRIVATE_ROUTES).</li>
+ *   <li>{@link IpRateLimitInterceptor}: Interceptor do Spring MVC que interpreta esta anotação.</li>
+ * </ul>
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
