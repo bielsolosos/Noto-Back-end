@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    show-sql: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+
+logging:
+  level:
+    root: INFO
+    "br.dev.bielsolosos.noto": DEBUG
+    org.hibernate.SQL: ERROR
+    org.hibernate.orm.jdbc.bind: ERROR

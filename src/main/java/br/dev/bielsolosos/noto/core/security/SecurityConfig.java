@@ -29,7 +29,10 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ROUTES = {
             "/api/users/register",
-            "/api/auth/**"
+            "/api/auth/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     private final CustomUserDetailsService userDetailsService;
