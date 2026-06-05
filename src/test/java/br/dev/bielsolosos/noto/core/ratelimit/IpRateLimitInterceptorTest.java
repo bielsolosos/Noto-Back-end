@@ -54,9 +54,13 @@ class IpRateLimitInterceptorTest {
     @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     static class TestController {
         @IpRateLimiter(IpRateLimitConfigEnum.PUBLIC_ROUTES)
-        public void annotatedMethod() {}
+        public void annotatedMethod() {
+            // Helper method used exclusively for testing method-level annotation presence.
+        }
 
-        public void unannotatedMethod() {}
+        public void unannotatedMethod() {
+            // Helper method used exclusively for testing annotation absence.
+        }
     }
 
     @Test
