@@ -45,10 +45,22 @@ resilience4j:
     configs:
       default:
         registerHealthIndicator: true
+      public-routes:
+        limitForPeriod: 30
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0s
+      private-routes:
+        limitForPeriod: 300
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0s
     instances:
       public-routes:
-        limitForPeriod: 3        # Permite 30 requisições...
-        limitRefreshPeriod: 1m    # ...a cada 1 minuto (por instância da aplicação)
+        limitForPeriod: 30
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0s
+      private-routes:
+        limitForPeriod: 300
+        limitRefreshPeriod: 1m
         timeoutDuration: 0s
 
 logging:
