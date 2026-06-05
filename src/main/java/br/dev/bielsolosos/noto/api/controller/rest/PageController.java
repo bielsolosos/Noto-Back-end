@@ -15,6 +15,8 @@ import br.dev.bielsolosos.noto.api.mapper.page.PageResponse;
 import br.dev.bielsolosos.noto.api.model.MessageResponse;
 import br.dev.bielsolosos.noto.api.model.page.PageSummaryResponse;
 import br.dev.bielsolosos.noto.core.enums.ExportTypeEnum;
+import br.dev.bielsolosos.noto.core.ratelimit.IpRateLimiter;
+import br.dev.bielsolosos.noto.core.ratelimit.enums.IpRateLimitConfigEnum;
 import br.dev.bielsolosos.noto.domain.pages.model.dto.PageToExportDto;
 import br.dev.bielsolosos.noto.domain.pages.service.PageService;
 
@@ -29,32 +31,40 @@ public class PageController {
     private final PageService service;
 
     @GetMapping("/list")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<List<PageSummaryResponse>> listAllPagesForSummary() {
         return ResponseEntity.ok(service.getAll().stream().map(PageMapper::toSummary).toList());
     }
 
     @GetMapping("/{id}")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<PageResponse> getPage(@PathVariable UUID id) {
         return ResponseEntity.ok(PageMapper.toPageResponse(service.getById(id)));
     }
 
     @DeleteMapping("/{id}")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<MessageResponse> deletePage(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.ok(new MessageResponse("Página deletado com sucesso"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PageResponse> editPageContent(@Valid @RequestBody PageRequest request, @PathVariable UUID id) {
-        return ResponseEntity.ok(PageMapper.toPageResponse(service.updateContent(id, request.title(), request.content())));
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
+    public ResponseEntity<PageResponse> editPageContent(@Valid @RequestBody PageRequest request,
+            @PathVariable UUID id) {
+        return ResponseEntity
+                .ok(PageMapper.toPageResponse(service.updateContent(id, request.title(), request.content())));
     }
 
     @PostMapping
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<PageResponse> createPage(@Valid @RequestBody PageRequest request) {
         return ResponseEntity.ok(PageMapper.toPageResponse(service.createPage(request.title(), request.content())));
     }
 
     @GetMapping("/{id}/export")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<Resource> exportPage(@PathVariable UUID id, @RequestParam ExportTypeEnum type) {
         PageToExportDto pojo = service.exportPage(id, type);
 
@@ -62,8 +72,7 @@ public class PageController {
         String contentDisposition = String.format(
                 "attachment; filename=\"%s\"; filename*=UTF-8''%s",
                 pojo.fileName().replace("\"", ""),
-                encodedFileName
-        );
+                encodedFileName);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
@@ -72,4 +81,3 @@ public class PageController {
                 .body(new ByteArrayResource(pojo.resource()));
     }
 }
-

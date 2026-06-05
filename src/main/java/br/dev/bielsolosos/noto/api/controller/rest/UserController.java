@@ -14,6 +14,8 @@ import br.dev.bielsolosos.noto.api.model.user.CreateUserRequest;
 import br.dev.bielsolosos.noto.api.model.user.EditUserRequest;
 import br.dev.bielsolosos.noto.api.model.user.UserResponse;
 import br.dev.bielsolosos.noto.core.exception.BusinessException;
+import br.dev.bielsolosos.noto.core.ratelimit.IpRateLimiter;
+import br.dev.bielsolosos.noto.core.ratelimit.enums.IpRateLimitConfigEnum;
 import br.dev.bielsolosos.noto.domain.users.service.MeService;
 import br.dev.bielsolosos.noto.domain.users.service.UserService;
 import br.dev.bielsolosos.noto.infrastructure.NotoProperties;
@@ -28,29 +30,33 @@ public class UserController {
     private final NotoProperties props;
 
     @PostMapping("/change-password")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<MessageResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         service.changePassword(meService.getMe().getId(), request.oldPassword(), request.newPassword());
         return ResponseEntity.ok(new MessageResponse("Senha alterada com sucesso"));
     }
-    
+
     @PostMapping("/edit-credentials")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<UserResponse> editUser(@Valid @RequestBody EditUserRequest request) {
         return ResponseEntity.ok(
                 UserMapper.toUserResponse(
-                        service.editUser(meService.getMe().getId(), request.username(), request.email())
-                )
-        );
+                        service.editUser(meService.getMe().getId(), request.username(), request.email())));
     }
 
     @PostMapping("/profile-image")
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
     public ResponseEntity<UserResponse> uploadProfileImage(@ModelAttribute MediaRequest mediaRequest) {
         return ResponseEntity.ok(UserMapper.toUserResponse(service.uploadProfileImage(mediaRequest.file())));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request)  throws NoHandlerFoundException {
+    @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request)
+            throws NoHandlerFoundException {
         if (!props.isRegistrationEnabled()) {
-            throw new NoHandlerFoundException("POST", "/api/users/register", new org.springframework.http.HttpHeaders());
+            throw new NoHandlerFoundException("POST", "/api/users/register",
+                    new org.springframework.http.HttpHeaders());
         }
 
         if (!request.password().equals(request.confirmPassword())) {
@@ -58,10 +64,8 @@ public class UserController {
         }
 
         UserResponse userResponse = UserMapper.toUserResponse(
-                service.createUser(request.username(), request.email(), request.password())
-        );
+                service.createUser(request.username(), request.email(), request.password()));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 }
-
