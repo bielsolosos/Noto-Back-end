@@ -19,6 +19,8 @@ import br.dev.bielsolosos.noto.api.model.page.PageSummaryResponse;
 import br.dev.bielsolosos.noto.core.enums.ExportTypeEnum;
 import br.dev.bielsolosos.noto.core.enums.MimeTypeEnum;
 import br.dev.bielsolosos.noto.core.exception.BusinessException;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortByEnum;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortOrderEnum;
 import br.dev.bielsolosos.noto.domain.pages.model.Page;
 import br.dev.bielsolosos.noto.domain.pages.model.dto.PageToExportDto;
 import br.dev.bielsolosos.noto.domain.pages.service.PageService;
@@ -57,16 +59,17 @@ class PageControllerTest {
 
     @Test
     void listAllPagesForSummarySuccess() {
-        when(pageService.getAll()).thenReturn(List.of(page));
+        when(pageService.getAll(null, PageSortByEnum.UPDATED_AT, PageSortOrderEnum.DESC)).thenReturn(List.of(page));
 
-        ResponseEntity<List<PageSummaryResponse>> response = controller.listAllPagesForSummary();
+        ResponseEntity<List<PageSummaryResponse>> response = controller.listAllPagesForSummary(
+                null, PageSortByEnum.UPDATED_AT, PageSortOrderEnum.DESC);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
         assertEquals(page.getId(), response.getBody().get(0).id());
         assertEquals(page.getTitle(), response.getBody().get(0).title());
-        verify(pageService, times(1)).getAll();
+        verify(pageService, times(1)).getAll(null, PageSortByEnum.UPDATED_AT, PageSortOrderEnum.DESC);
     }
 
     @Test

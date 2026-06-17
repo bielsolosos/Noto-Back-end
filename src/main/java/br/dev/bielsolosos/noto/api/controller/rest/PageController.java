@@ -17,6 +17,8 @@ import br.dev.bielsolosos.noto.api.model.page.PageSummaryResponse;
 import br.dev.bielsolosos.noto.core.enums.ExportTypeEnum;
 import br.dev.bielsolosos.noto.core.ratelimit.IpRateLimiter;
 import br.dev.bielsolosos.noto.core.ratelimit.enums.IpRateLimitConfigEnum;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortByEnum;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortOrderEnum;
 import br.dev.bielsolosos.noto.domain.pages.model.dto.PageToExportDto;
 import br.dev.bielsolosos.noto.domain.pages.service.PageService;
 
@@ -32,8 +34,11 @@ public class PageController {
 
     @GetMapping("/list")
     @IpRateLimiter(IpRateLimitConfigEnum.PRIVATE_ROUTES)
-    public ResponseEntity<List<PageSummaryResponse>> listAllPagesForSummary() {
-        return ResponseEntity.ok(service.getAll().stream().map(PageMapper::toSummary).toList());
+    public ResponseEntity<List<PageSummaryResponse>> listAllPagesForSummary(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "UPDATED_AT") PageSortByEnum sortBy,
+            @RequestParam(defaultValue = "DESC") PageSortOrderEnum sortOrder) {
+        return ResponseEntity.ok(service.getAll(query, sortBy, sortOrder).stream().map(PageMapper::toSummary).toList());
     }
 
     @GetMapping("/{id}")

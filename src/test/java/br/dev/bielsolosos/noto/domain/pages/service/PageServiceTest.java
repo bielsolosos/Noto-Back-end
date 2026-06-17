@@ -6,9 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import br.dev.bielsolosos.noto.core.enums.ExportTypeEnum;
 import br.dev.bielsolosos.noto.core.enums.MimeTypeEnum;
 import br.dev.bielsolosos.noto.core.exception.BusinessException;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortByEnum;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortOrderEnum;
 import br.dev.bielsolosos.noto.domain.pages.model.Page;
 import br.dev.bielsolosos.noto.domain.pages.model.dto.PageToExportDto;
 import br.dev.bielsolosos.noto.domain.pages.repository.PageRepository;
@@ -194,10 +198,9 @@ class PageServiceTest {
         maisRecente.setTitle("Recente");
         maisRecente.setUpdatedAt(OffsetDateTime.now());
 
-        // A lista que o repository retornaria JÁ ORDENADA (Descendente: mais recente primeiro)
         List<Page> listaEsperada = List.of(maisRecente, maisAntiga);
 
-        when(pageRepository.findByUserIdOrderByUpdatedAtDesc(any()))
+        when(pageRepository.findAll(any(Specification.class)))
                 .thenReturn(listaEsperada);
 
         List<Page> allFoundPages = pageService.getAll();
@@ -205,9 +208,53 @@ class PageServiceTest {
         assertNotNull(allFoundPages);
         assertEquals(2, allFoundPages.size());
 
-        // Garante que a primeira da lista é a mais recente
         assertEquals("Recente", allFoundPages.get(0).getTitle());
         assertEquals(listaEsperada, allFoundPages);
+    }
+
+    @Test
+    void getAllWithSortParams() {
+        when(meService.getMe()).thenReturn(owner);
+
+        Page pageA = new Page();
+        pageA.setTitle("A Página");
+        pageA.setCreatedAt(OffsetDateTime.now());
+
+        Page pageZ = new Page();
+        pageZ.setTitle("Z Página");
+        pageZ.setCreatedAt(OffsetDateTime.now().minusDays(1));
+
+        List<Page> listaEsperada = List.of(pageA, pageZ);
+
+        when(pageRepository.findAll(any(Specification.class)))
+                .thenReturn(listaEsperada);
+
+        List<Page> allFoundPages = pageService.getAll(null, PageSortByEnum.TITLE, PageSortOrderEnum.ASC);
+
+        assertNotNull(allFoundPages);
+        assertEquals(2, allFoundPages.size());
+        assertEquals("A Página", allFoundPages.get(0).getTitle());
+        assertEquals(listaEsperada, allFoundPages);
+    }
+
+    @Test
+    void getAllWithQuery() {
+        when(meService.getMe()).thenReturn(owner);
+
+        Page page = new Page();
+        page.setTitle("Teste Página");
+        page.setUpdatedAt(OffsetDateTime.now());
+
+        List<Page> listaEsperada = List.of(page);
+
+        when(pageRepository.findAll(any(Specification.class)))
+                .thenReturn(listaEsperada);
+
+        List<Page> allFoundPages = pageService.getAll("Teste", PageSortByEnum.UPDATED_AT, PageSortOrderEnum.DESC);
+
+        assertNotNull(allFoundPages);
+        assertEquals(1, allFoundPages.size());
+        assertEquals("Teste Página", allFoundPages.get(0).getTitle());
     }
 
     @Test

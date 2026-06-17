@@ -5,11 +5,14 @@ import org.springframework.stereotype.Service;
 import br.dev.bielsolosos.noto.core.enums.ExportTypeEnum;
 import br.dev.bielsolosos.noto.core.enums.MimeTypeEnum;
 import br.dev.bielsolosos.noto.core.exception.BusinessException;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortByEnum;
+import br.dev.bielsolosos.noto.domain.pages.enums.PageSortOrderEnum;
 import br.dev.bielsolosos.noto.domain.pages.export.factory.ExportPageFactory;
 import br.dev.bielsolosos.noto.domain.pages.export.service.PageExporterService;
 import br.dev.bielsolosos.noto.domain.pages.model.Page;
 import br.dev.bielsolosos.noto.domain.pages.model.dto.PageToExportDto;
 import br.dev.bielsolosos.noto.domain.pages.repository.PageRepository;
+import br.dev.bielsolosos.noto.domain.pages.repository.specification.PageSpecification;
 import br.dev.bielsolosos.noto.domain.users.model.User;
 import br.dev.bielsolosos.noto.domain.users.service.MeService;
 
@@ -38,7 +41,9 @@ public class PageService {
     public Page createPage(String title, String content) {
         Page page = new Page();
         page.setUser(meService.getMe());
-        page.setTitle(title == null ? String.format("Nova Nota dia: %s", OffsetDateTime.now().toLocalDateTime().toString()) : title);
+        page.setTitle(
+                title == null ? String.format("Nova Nota dia: %s", OffsetDateTime.now().toLocalDateTime().toString())
+                        : title);
         page.setContent(content == null ? "" : content);
         return repository.save(page);
     }
@@ -57,7 +62,13 @@ public class PageService {
     }
 
     public List<Page> getAll() {
-        return repository.findByUserIdOrderByUpdatedAtDesc(meService.getMe().getId());
+        return getAll(null, PageSortByEnum.UPDATED_AT, PageSortOrderEnum.DESC);
+    }
+
+    public List<Page> getAll(String query, PageSortByEnum sortBy, PageSortOrderEnum sortOrder) {
+        UUID userId = meService.getMe().getId();
+        PageSpecification spec = new PageSpecification(userId, query, sortBy, sortOrder);
+        return repository.findAll(spec);
     }
 
     public List<Page> getAllArchivedPages() {
@@ -80,6 +91,7 @@ public class PageService {
         entity.setArchivedAt(OffsetDateTime.now());
         repository.save(entity);
     }
+
     public void delete(UUID id) {
         User me = meService.getMe();
         Page entity = findById(id);
@@ -87,17 +99,18 @@ public class PageService {
         repository.delete(entity);
     }
 
-
     private void validatePermission(UUID id, Page entity) {
         User me = meService.getMe();
         if (!entity.getUser().getId().equals(me.getId())) {
-            throw new BusinessException(String.format("Usuário %s não tem permissão para editar a página de Id: %s", me.getUsername(), id));
+            throw new BusinessException(
+                    String.format("Usuário %s não tem permissão para editar a página de Id: %s", me.getUsername(), id));
         }
     }
 
     private void validatePermission(Page entity, User me) {
         if (!entity.getUser().getId().equals(me.getId())) {
-            throw new BusinessException(String.format("Usuário %s não tem permissão para editar a página de Id", me.getUsername()));
+            throw new BusinessException(
+                    String.format("Usuário %s não tem permissão para editar a página de Id", me.getUsername()));
         }
     }
 
