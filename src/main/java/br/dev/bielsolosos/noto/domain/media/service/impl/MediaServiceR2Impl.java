@@ -56,7 +56,7 @@ public class MediaServiceR2Impl implements MediaService {
         MediaR2 media = repository.findById(id)
                 .orElseThrow(() -> new BusinessException("Imagem não encontrada"));
 
-        if (!me.equals(media.getUser())) {
+        if (!media.getUser().getId().equals(me.getId())) {
             throw new BusinessException("Você não tem permissão para deletar.");
         }
 
@@ -77,7 +77,8 @@ public class MediaServiceR2Impl implements MediaService {
 
     @Override
     public Page<MediaR2> listPageable(Pageable pageable, String filter) {
-        MediaSpecification specification = new MediaSpecification(filter);
+        User me = meService.getMe();
+        MediaSpecification specification = new MediaSpecification(me.getId(), filter);
         return repository.findAll(specification, pageable);
     }
 
@@ -112,7 +113,15 @@ public class MediaServiceR2Impl implements MediaService {
 
     @Override
     public MediaR2 getMedia(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new BusinessException("Media não encontrada"));
+        User me = meService.getMe();
+        MediaR2 media = repository.findById(id)
+                .orElseThrow(() -> new BusinessException("Media não encontrada"));
+
+        if (!media.getUser().getId().equals(me.getId())) {
+            throw new BusinessException("Você não tem permissão para acessar essa mídia.");
+        }
+
+        return media;
     }
 
     private void deleteObject(String key) {

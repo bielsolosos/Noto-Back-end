@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -31,10 +32,10 @@ class MediaSpecificationTest {
     private MediaR2Repository repository;
 
     private User testUser;
+    private User otherUser;
 
     @BeforeEach
     void setUp() {
-        // Remove everything because we have cross-test dependencies optionally
         entityManager.createNativeQuery("DELETE FROM media_r2").executeUpdate();
 
         testUser = new User();
@@ -44,17 +45,26 @@ class MediaSpecificationTest {
         testUser.setActive(true);
         testUser.setRoles(getUserRole());
         entityManager.persist(testUser);
+
+        otherUser = new User();
+        otherUser.setUsername("otheruser_media_" + UUID.randomUUID().toString().substring(0, 5));
+        otherUser.setEmail(UUID.randomUUID().toString() + "@test.com");
+        otherUser.setPassword("123456");
+        otherUser.setActive(true);
+        otherUser.setRoles(getUserRole());
+        entityManager.persist(otherUser);
+
         entityManager.flush();
     }
 
     @Test
     void toPredicateWithFilterShouldMatchByFilenameAndUrlIgnoringCaseAndSpaces() {
-        createMedia("teste_image.png", "http://example.com/images/1");
-        createMedia("avatar.jpg", "http://example.com/teste_folder/2");
-        createMedia("document.pdf", "http://example.com/docs/3");
+        createMedia(testUser, "teste_image.png", "http://example.com/images/1");
+        createMedia(testUser, "avatar.jpg", "http://example.com/teste_folder/2");
+        createMedia(testUser, "document.pdf", "http://example.com/docs/3");
 
-        var byFilename = repository.findAll(new MediaSpecification("  TESTE_IMAGE  "));
-        var byUrl = repository.findAll(new MediaSpecification("TESTE_FOLDER"));
+        var byFilename = repository.findAll(new MediaSpecification(testUser.getId(), "  TESTE_IMAGE  "));
+        var byUrl = repository.findAll(new MediaSpecification(testUser.getId(), "TESTE_FOLDER"));
 
         assertEquals(1, byFilename.size());
         assertEquals("teste_image.png", byFilename.getFirst().getFilename());
@@ -65,21 +75,50 @@ class MediaSpecificationTest {
 
     @Test
     void toPredicateWithBlankFilterShouldNotApplyFilter() {
-        createMedia("image1.png", "http://example.com/1");
-        createMedia("image2.png", "http://example.com/2");
+        createMedia(testUser, "image1.png", "http://example.com/1");
+        createMedia(testUser, "image2.png", "http://example.com/2");
 
-        List<MediaR2> allMedia = repository.findAll(new MediaSpecification("   "));
+        List<MediaR2> allMedia = repository.findAll(new MediaSpecification(testUser.getId(), "   "));
 
         assertEquals(2, allMedia.size());
     }
 
-    private void createMedia(String filename, String url) {
+    @Test
+    void shouldOnlyReturnMediaOwnedByGivenUser() {
+        createMedia(testUser, "mine1.png", "http://example.com/mine/1");
+        createMedia(testUser, "mine2.png", "http://example.com/mine/2");
+        createMedia(otherUser, "other1.png", "http://example.com/other/1");
+        createMedia(otherUser, "other2.png", "http://example.com/other/2");
+
+        List<MediaR2> testUserMedia = repository.findAll(new MediaSpecification(testUser.getId(), null));
+        List<MediaR2> otherUserMedia = repository.findAll(new MediaSpecification(otherUser.getId(), null));
+
+        assertEquals(2, testUserMedia.size());
+        assertTrue(testUserMedia.stream().allMatch(m -> m.getUser().getId().equals(testUser.getId())));
+
+        assertEquals(2, otherUserMedia.size());
+        assertTrue(otherUserMedia.stream().allMatch(m -> m.getUser().getId().equals(otherUser.getId())));
+    }
+
+    @Test
+    void shouldCombineUserFilterAndTextFilter() {
+        createMedia(testUser, "shared.png", "http://example.com/shared/1");
+        createMedia(testUser, "other.png", "http://example.com/x/2");
+        createMedia(otherUser, "shared.png", "http://example.com/shared/3");
+
+        List<MediaR2> result = repository.findAll(new MediaSpecification(testUser.getId(), "shared"));
+
+        assertEquals(1, result.size());
+        assertEquals(testUser.getId(), result.getFirst().getUser().getId());
+    }
+
+    private void createMedia(User user, String filename, String url) {
         MediaR2 media = new MediaR2();
         media.setFilename(filename);
         media.setUrl(url);
         media.setContentType("image/png");
         media.setSizeBytes(1024L);
-        media.setUser(testUser);
+        media.setUser(user);
         media.setCreatedAt(OffsetDateTime.now());
         entityManager.persist(media);
         entityManager.flush();
