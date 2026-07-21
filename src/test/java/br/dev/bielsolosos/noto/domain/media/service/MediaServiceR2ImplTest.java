@@ -3,6 +3,7 @@ package br.dev.bielsolosos.noto.domain.media.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,7 +60,7 @@ class MediaServiceR2ImplTest {
     void setUp() {
         me = new User();
         me.setId(UUID.randomUUID());
-        
+
         other = new User();
         other.setId(UUID.randomUUID());
 
@@ -113,6 +114,7 @@ class MediaServiceR2ImplTest {
         when(repository.findById(mediaId)).thenReturn(Optional.of(media));
 
         assertThrows(BusinessException.class, () -> mediaService.delete(mediaId));
+        verify(repository, never()).delete(any(MediaR2.class));
     }
 
     @Test
@@ -134,6 +136,7 @@ class MediaServiceR2ImplTest {
     void listPageable_shouldReturnPage() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<MediaR2> expectedPage = new PageImpl<>(List.of(media));
+        when(meService.getMe()).thenReturn(me);
         when(repository.findAll(any(MediaSpecification.class), eq(pageable))).thenReturn(expectedPage);
 
         Page<MediaR2> result = mediaService.listPageable(pageable, "filter");
@@ -141,6 +144,19 @@ class MediaServiceR2ImplTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         verify(repository, times(1)).findAll(any(MediaSpecification.class), eq(pageable));
+    }
+
+    @Test
+    void listPageable_shouldBuildSpecificationWithAuthenticatedUserId() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(meService.getMe()).thenReturn(me);
+        when(repository.findAll(any(MediaSpecification.class), eq(pageable))).thenReturn(Page.empty(pageable));
+
+        mediaService.listPageable(pageable, "any-filter");
+
+        ArgumentCaptor<MediaSpecification> specCaptor = ArgumentCaptor.forClass(MediaSpecification.class);
+        verify(repository).findAll(specCaptor.capture(), eq(pageable));
+        assertEquals(me.getId(), specCaptor.getValue().getUserId());
     }
 
     @Test
@@ -158,16 +174,30 @@ class MediaServiceR2ImplTest {
     }
 
     @Test
-    void getMedia_shouldReturnMedia() {
+    void getMedia_shouldReturnMediaWhenOwner() {
+        when(meService.getMe()).thenReturn(me);
         when(repository.findById(mediaId)).thenReturn(Optional.of(media));
+
         MediaR2 result = mediaService.getMedia(mediaId);
+
         assertNotNull(result);
         assertEquals(mediaId, result.getId());
     }
 
     @Test
     void getMedia_shouldThrowIfNotFound() {
+        when(meService.getMe()).thenReturn(me);
         when(repository.findById(mediaId)).thenReturn(Optional.empty());
+
         assertThrows(BusinessException.class, () -> mediaService.getMedia(mediaId));
+    }
+
+    @Test
+    void getMedia_shouldThrowIfNotOwner() {
+        when(meService.getMe()).thenReturn(other);
+        when(repository.findById(mediaId)).thenReturn(Optional.of(media));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> mediaService.getMedia(mediaId));
+        assertEquals("Você não tem permissão para acessar essa mídia.", ex.getMessage());
     }
 }
